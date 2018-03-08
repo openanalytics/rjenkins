@@ -1,7 +1,7 @@
 Package: rjenkins
 Type: Package
 Title: R Wrapper around the jenkins api with some extra oa-specific tools
-Version: 0.0.3
+Version: 0.0.4
 Date: 2018-03-05
 Author: Daan Seynaeve
 Maintainer: Daan Seynaeve <daan.seynaeve@openanalytics.eu>

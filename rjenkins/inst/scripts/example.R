@@ -23,7 +23,9 @@ conn <- jenkinsConnection(
 ## packamon
 
 # set working directory inside a git repo
-createPackamonJob(conn)
+job <- createPackamonJob(conn)
+install_jenkins(conn, job, listJobArtifacts(conn, job))
+
 
 ## general use
 
