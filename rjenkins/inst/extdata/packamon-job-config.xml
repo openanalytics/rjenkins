@@ -50,7 +50,7 @@
     <builders>
         <hudson.tasks.Shell>
             <command>
-                PACKAMON=registry.openanalytics.eu:5000/devregistry/packamon
+                PACKAMON=registry.openanalytics.eu/private/packamon
                 docker pull $PACKAMON
                 docker run -v $PWD:/workspace $PACKAMON
             </command>

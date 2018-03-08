@@ -20,6 +20,13 @@ conn <- jenkinsConnection(
     user = "dseynaeve",
     token = decrypt_gk_pw("jenkins ci user dseynaeve"))
 
+## packamon
+
+# set working directory inside a git repo
+createPackamonJob(conn)
+
+## general use
+
 # list all jobs
 
 jobs <- listJobs(conn)
