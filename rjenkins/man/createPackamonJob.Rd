@@ -8,7 +8,7 @@ createPackamonJob(conn, remote = "origin", branch = "master",
   description = "Automatically created. Managed by packamon.")
 }
 \arguments{
-\item{conn}{connection to a jenkins instance. Result of \link{jenkinsConnection}}
+\item{conn}{connection to a jenkins instance. Result of \link{jenkins}}
 
 \item{remote}{either a remote name or a repository url. If a remote name
 is supplied, the repository url will be looked up from the git config.}

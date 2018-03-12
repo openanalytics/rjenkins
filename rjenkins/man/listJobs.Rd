@@ -7,7 +7,7 @@
 listJobs(conn)
 }
 \arguments{
-\item{conn}{connection to a jenkins instance. Result of \link{jenkinsConnection}}
+\item{conn}{connection to a jenkins instance. Result of \link{jenkins}}
 }
 \description{
 List all jobs names

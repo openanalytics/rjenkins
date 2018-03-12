@@ -2,7 +2,7 @@
 % Please edit documentation in R/jenkins.R
 \name{jenkinsConnection}
 \alias{jenkinsConnection}
-\title{Connect to jenkins}
+\title{Connect to a Jenkins Server}
 \usage{
 jenkinsConnection(host, user, token)
 }

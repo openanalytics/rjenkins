@@ -7,7 +7,7 @@
 crumbRequest(conn)
 }
 \arguments{
-\item{conn}{connection to a jenkins instance. Result of \link{jenkinsConnection}}
+\item{conn}{connection to a jenkins instance. Result of \link{jenkins}}
 }
 \value{
 crumb as \link{character()}

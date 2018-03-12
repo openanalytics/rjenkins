@@ -12,7 +12,6 @@
 #' is supplied, the repository url will be looked up from the git config.
 #' @param branch branch name
 #' @param description job description
-#' @param username
 #' @return job name
 #' @importFrom xml2 xml_child xml_text read_xml
 #' @export

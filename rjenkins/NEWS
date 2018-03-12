@@ -1,3 +1,8 @@
+0.0.5
+    o S3-based package structure with object for jenkins server/connection and
+      an object for job
+    o various new functions e.g. to request build history
+    o include a vignette on creating packamon jobs through rjenkins
 0.0.4
     o create packamon job based local git repo settings
 0.0.3

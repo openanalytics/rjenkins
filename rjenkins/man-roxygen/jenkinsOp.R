@@ -1,1 +1,1 @@
-#' @param conn connection to a jenkins instance. Result of \link{jenkinsConnection} 
+#' @param conn connection to a jenkins instance. Result of \link{jenkins} 

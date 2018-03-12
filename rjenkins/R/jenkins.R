@@ -1,5 +1,10 @@
+# Jenkins top-level operations
+# 
+# Author: Daan Seynaeve
+###############################################################################
 
-#' Connect to jenkins
+
+#' Connect to a Jenkins Server
 #' @description Create a connection object for the Jenkins API.
 #' @param host jenkins endpoint
 #' @param user user to connect with
@@ -15,6 +20,67 @@ jenkinsConnection <- function(host, user, token) {
       class = c("jenkinsConnection", "list"))
   
 }
+
+#' Show a Jenkins Object
+#' @description Display information about a jenkins object.
+#' @template jenkinsOp
+#' @export
+print.jenkinsConnection <- function(conn) {
+  
+  cat(sprintf("<jenkins server with url: %s>", conn$host))
+  
+}
+
+#' Print summary information about the Jenkins Server
+#' @template jenkinsOp
+#' @export
+summary.jenkinsConnection <- function(conn) {
+
+	# TODO: what to do here?
+
+}
+
+#' List all jobs names
+#' @template jenkinsOp
+#' @importFrom httr modify_url GET authenticate content
+#' @export
+listJobs <- function(conn) {
+  
+  url <- modify_url(conn$host,
+      path  = c("api", "xml"),
+      query = list(xpath = "/*/job/name", wrapper = "jobs"))
+  
+  response <- GET(url, authenticate(conn$user, conn$token))
+  
+  unlist(as_list(content(response)), use.names = FALSE)
+  
+}
+
+#' Find a job on jenkins
+#' @template jenkinsOp
+#' @param name job name
+#' @return object of class \code{jenkinsJob}
+#' @export
+getJob <- function(conn, name) {
+  
+  if (!hasJob(conn, name)) {
+    stop("Job with given name does not exist on the jenkins server.")
+  }
+  
+  jenkinsJob(conn, name)
+   
+}
+
+#' Check if a job with given name exists
+#' @template jenkinsOp
+#' @param jobName job name
+#' @export
+hasJob <- function(conn, jobName) {
+  
+  any(listJobs(conn) == jobName)
+  
+}
+
 
 #' Create a crumb header
 #' @param crumb result of \link{crumbRequest}
@@ -35,7 +101,7 @@ crumbHeader <- function(crumb) {
 #' @template jenkinsOp
 #' @references \link{https://wiki.jenkins.io/display/JENKINS/Remote+access+API#RemoteaccessAPI-CSRFProtection}
 #' @return crumb as \link{character()}
-#' @importFrom httr modify_url authenticate GET content
+#' @importFrom httr modify_url authenticate GET content stop_for_status
 #' @export
 crumbRequest <- function(conn) {
   
@@ -54,16 +120,16 @@ crumbRequest <- function(conn) {
 #' Create a new job
 #' @description Creates a new job with given name and xml config.
 #' @template jenkinsOp
-#' @param job job name
+#' @param name job name
 #' @param config job xml specification given either as a file path or an object
 #' of class \code{xml_document} from the \code{xml2} package
 #' @seealso \link{crumbRequest}
 #' @seealso \link{xml2::read_xml}
 #' @importFrom httr modify_url authenticate POST content_type_xml
 #' @importFrom xml2 read_xml
-#' @return status code
+#' @return jenkins job
 #' @export
-createJob <- function(conn, job, config) {
+createJob <- function(conn, name, config) {
   
   if (!inherits(config, "xml_document")) {
     stopifnot(file.exists(config))
@@ -72,7 +138,7 @@ createJob <- function(conn, job, config) {
   
   url <- modify_url(conn$host,
       path = "createItem",
-      query = list(name = job))
+      query = list(name = name))
   
   response <- POST(url, authenticate(conn$user, conn$token),
       content_type_xml(),
@@ -81,79 +147,7 @@ createJob <- function(conn, job, config) {
   
   stop_for_status(response)
   
-  status_code(response)
-  
-}
-
-#' Check if a job with given name exists
-#' @template jenkinsOp
-#' @param job job name
-#' @export
-hasJob <- function(conn, job) {
-  
-  any(listJobs(conn) == job)
-  
-}
-
-#' List all jobs names
-#' @template jenkinsOp
-#' @importFrom httr modify_url GET authenticate content
-#' @export
-listJobs <- function(conn) {
-  
-  url <- modify_url(conn$host,
-      path  = c("api", "xml"),
-      query = list(xpath = "/*/job/name", wrapper = "jobs"))
-  
-  response <- GET(url, authenticate(conn$user, conn$token))
-  
-  unlist(as_list(content(response)), use.names = FALSE)
-  
-}
-
-
-#' List artifacts 
-#' @param conn result of \link{jenkinsConnection}
-#' @param job job name
-#' @param build build number of identifier
-#' @importFrom httr modify_url GET authenticate content
-#' @importFrom xml2 as_list
-#' @export
-listJobArtifacts <- function(conn, job, build = "lastStableBuild") {
-  
-  if (!is.numeric(build)) {
-    build <- match.arg(build, "lastStableBuild")
-  }
-  
-  url <- modify_url(conn$host,
-      path = c("job", job, build, "api", "xml"),
-      query = list(xpath = "/*/artifact/relativePath", wrapper = "artifacts"))
-  
-  response <- GET(url, authenticate(conn$user, conn$token))
-  
-  unlist(as_list(content(response))) 
-}
-
-#' Retrieve the build log
-#' @param conn result of \link{jenkinsConnection}
-#' @param job job name
-#' @param build build number of identifier
-#' @param start byte offset
-#' @importFrom httr modify_url GET authenticate content
-#' @export
-getBuildLog <- function(conn, job, build = "lastBuild", start = 0) {
-  
-  if (!is.numeric(build)) {
-    build <- match.arg(build, c("lastStableBuild", "lastBuild"))
-  }
-  
-  url <- modify_url(conn$host,
-      path = c("job", job, build, "logText", "progressiveText"),
-      query = list(start = start))
-  
-  response <- GET(url, authenticate(conn$user, conn$token))
-  
-  content(response)
+  jenkinsJob(conn, name)
   
 }
 

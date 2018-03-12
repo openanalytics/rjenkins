@@ -4,18 +4,18 @@
 \alias{createJob}
 \title{Create a new job}
 \usage{
-createJob(conn, job, config)
+createJob(conn, name, config)
 }
 \arguments{
-\item{conn}{connection to a jenkins instance. Result of \link{jenkinsConnection}}
+\item{conn}{connection to a jenkins instance. Result of \link{jenkins}}
 
-\item{job}{job name}
+\item{name}{job name}
 
 \item{config}{job xml specification given either as a file path or an object
 of class \code{xml_document} from the \code{xml2} package}
 }
 \value{
-status code
+jenkins job
 }
 \description{
 Creates a new job with given name and xml config.

@@ -24,24 +24,29 @@ conn <- jenkinsConnection(
 
 # set working directory inside a git repo
 job <- createPackamonJob(conn)
-install_jenkins(conn, job, listJobArtifacts(conn, job))
+install_jenkins(conn, job, listJobArtifacts(conn, job)[1])
 
+# FIXME: need some way to always get the latest version
 
 ## general use
 
 # list all jobs
 
 jobs <- listJobs(conn)
-jobs[which(grepl("monte-carlo", jobs))]
+jobs[which(grepl("rjenkins", jobs))]
+
+# get a job
+
+job <- getJob(conn, "phenoprint-docker")
 
 # print a build log
 
-cat(getBuildLog(conn, "monte-carlo-master"))
+cat(getBuildLog(job))
 
 # installing packamon
 
-artifacts <- listJobArtifacts(conn, "packamon")
-install_jenkins(conn, "packamon", pkg = artifacts[1])
+artifacts <- listJobArtifacts(conn, "rjenkins-master")
+install_jenkins(conn, "rjenkins-master", pkg = artifacts[1])
 
 # creating a job
 
