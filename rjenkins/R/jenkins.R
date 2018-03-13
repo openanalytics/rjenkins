@@ -3,7 +3,6 @@
 # Author: Daan Seynaeve
 ###############################################################################
 
-
 #' Connect to a Jenkins Server
 #' @description Create a connection object for the Jenkins API.
 #' @param host jenkins endpoint
@@ -152,29 +151,4 @@ createJob <- function(conn, name, config) {
 }
 
 
-#' Install an exported artifact as package
-#' @param conn result of \link{jenkinsConnection}
-#' @param job job name
-#' @param pkg name of the artifact that corresponds to the R package archive
-#' to install
-#' @param tmpDir temporary directory to store downloaded package archive
-#' @param build build number of identifier
-#' @importFrom httr modify_url GET authenticate write_disk
-#' @importFrom utils install.packages
-#' @export
-install_jenkins <- function(conn, job, pkg, build = "lastStableBuild",
-    tmpDir = normalizePath(file.path("~", "Downloads"))) {
-  
-  if (!is.numeric(build)) {
-    build <- match.arg(build, "lastStableBuild")
-  }
-  
-  url <- modify_url(conn$host,
-      path = c("job", job, build, "artifact", pkg))
-  
-  response <- GET(url, write_disk(file.path(tmpDir, pkg), overwrite = TRUE),
-      authenticate(conn$user, conn$token))
-  
-  install.packages(pkgs = file.path(tmpDir, pkg), repos = NULL, type = "source")
-  
-}
+

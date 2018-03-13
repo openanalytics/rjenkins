@@ -118,3 +118,25 @@ schedulePolling(job)
 
 The difference between both function is that the latter will only trigger a
 build if the any changes were pushed to the git repository since the last build.
+
+# Installing R packages from Jenkins
+
+`rjenkins` also includes some tools to install R packages directly from
+Jenkins:
+
+```{r eval=FALSE}
+install_jenkins(job)
+```
+
+This will attempt to install all artifacts with a valid R package archive
+name exported from the latest successful build of the given job. If
+multiple versions of the same package are exported, only the latest
+one will be installed by default. To learn more and to customize the
+behaviour, refer to `?install_jenkins`.
+
+Note that Jenkins is not an appropriate distribution platform for packages.
+The installation tools presented here are meant to be used in a early
+stage of the package development process, when a package is not mature
+enough yet to be released into the world.
+
+

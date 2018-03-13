@@ -85,7 +85,7 @@ getJobInfo <- function(job) {
 #' @template jenkinsJobOp
 #' @param depth maximum number of builds to list
 #' @return \code{data.frame} where each row corresponds to one build
-#' @importFrom xml2 xml_children
+#' @importFrom xml2 xml_children xml_text
 #' @export
 getBuildHistory <- function(job, depth = 3) {
   
@@ -156,7 +156,7 @@ scheduleBuild <- function(job, params = NULL) {
   
   response <- POST(url,
       authenticate(job$conn$user, job$conn$token),
-      crumbHeader(crumbRequest(conn)))
+      crumbHeader(crumbRequest(job$conn)))
   
   http_status(response)
   
