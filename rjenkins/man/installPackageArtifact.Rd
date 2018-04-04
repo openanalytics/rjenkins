@@ -6,7 +6,7 @@
 \usage{
 installPackageArtifact(job, artifacts = listArtifacts(job,
   "lastSuccessfulBuild"), build = JENKINS_BUILD_REFS, latestOnly = TRUE,
-  tmpDir = normalizePath(file.path("~", "Downloads")))
+  tmpDir = normalizePath(file.path("~", "Downloads")), ...)
 }
 \arguments{
 \item{job}{object of class \code{jenkinsJob} e.g. created using \code{\link{getJob}}}
@@ -21,6 +21,8 @@ exported from the latest succesful build of the corresponding job.}
 of the same package are given in \code{pkg}; \code{TRUE} by default}
 
 \item{tmpDir}{temporary directory to store downloaded package archive}
+
+\item{...}{further arguments to \code{\link{install.packages}}}
 }
 \value{
 nothing

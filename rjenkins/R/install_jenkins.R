@@ -3,6 +3,54 @@
 # Author: Daan Seynaeve
 ###############################################################################
 
+#' Install a Package from Jenkins
+#' @description Convenience wrapper to \code{\link{installPackageArtifact}}
+#' @param uri resource identifier, formatted \code{<url>/<job>/<package>[#build]},
+#' where build is optional and can be either a build number or a build ref. 
+#' See \code{\link{JENKINS_BUILD_REFS}}. If no build is specified,
+#' \code{lastSuccessfulBuild} will be used. 
+#' @param auth authentication credentials. See \link{jenkinsCredentials}
+#' @return package name (invisible)
+#' @examples
+#' \dontRun{
+#' install_jenkins("https://ci.openanalytics.eu/packamon/packamon")
+#' }
+#' @export
+install_jenkins <- function(uri, auth = jenkinsAuthEnv()) {
+  
+  pattern <- "^(.*)/(.*)/([a-zA-Z0-9.]{2,})(#(.)+)?$"
+  
+  grepl(pattern, uri)
+  
+  parts <- list(
+      host = gsub(pattern, "\\1", uri),
+      jobName = gsub(pattern, "\\2", uri),
+      pkgName = gsub(pattern, "\\2", uri),
+      build = gsub(pattern, "\\5", uri))
+  
+  if(nchar(parts$build) == 0) {
+    parts$build <- "lastSuccessfulBuild"
+  } 
+  
+  if(grepl("^[0-9]+$", parts$build)) {
+    parts$build <- as.numeric(parts$build)
+  } else {
+    parts$build <- match.arg(parts$build, JENKINS_BUILD_REFS)
+  }
+  
+  conn <- jenkinsConnection(parts$host, auth = auth)
+  
+  job <- getJob(conn, parts$jobName)
+  
+  archives <- extractPackageArchives(listArtifacts(job))
+
+  installPackageArtifact(job = job,
+      artifacts = archives$archive[archives$name == parts$pkgName])
+  
+  invisible(parts$pkgName)
+
+}
+
 
 #' Extract Package Archives Names from Build Artifacts
 #' @description Filter a given vector of artifact names to only retain the
@@ -57,6 +105,7 @@ extractPackageArchives <- function(artifacts, latestOnly = TRUE,
 #' @param latestOnly only install the latest version when multiple versions
 #' of the same package are given in \code{pkg}; \code{TRUE} by default
 #' @param tmpDir temporary directory to store downloaded package archive
+#' @param ... further arguments to \code{\link{install.packages}}
 #' @details only artifacts that have a name that is interpretable under the
 #' default package archive naming convention will be installed.
 #' @return nothing
@@ -70,7 +119,8 @@ installPackageArtifact <- function(
     artifacts = listArtifacts(job, "lastSuccessfulBuild"),
     build = JENKINS_BUILD_REFS,
     latestOnly = TRUE,
-    tmpDir = normalizePath(file.path("~", "Downloads"))) {
+    tmpDir = normalizePath(file.path("~", "Downloads")),
+    ...) {
   
   if (!is.numeric(build)) {
     build <- match.arg(build, JENKINS_BUILD_REFS)

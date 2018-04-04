@@ -3,14 +3,25 @@
 # Author: Daan Seynaeve
 ###############################################################################
 
+
+
 #' Connect to a Jenkins Server
-#' @description Create a connection object for the Jenkins API.
+#' @description Create a connection object for the Jenkins API. Credentials
+#' must be specified either directly or through a configuration object.
 #' @param host jenkins endpoint
 #' @param user user to connect with
 #' @param token token to use for authentication
+#' @param auth authentication credentials obtained via \code{\link{jenkinsAuth}}
 #' @return object of class \code{jenkinsConnection}
 #' @export
-jenkinsConnection <- function(host, user, token) {
+jenkinsConnection <- function(host, user = NULL, token = NULL, auth = NULL) {
+  
+  if (!is.null(auth)) {
+    user <- auth$user
+    token <- auth$token
+  }
+  
+  if (is.null(user) || is.null(token)) stop("missing credentials")
   
   structure(
       list(host = host,

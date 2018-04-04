@@ -11,6 +11,7 @@ library(keyringr)
 # https://cran.r-project.org/web/packages/keyringr/vignettes/Avoiding_plain_text_passwords_in_R_with_keyringr.html
 # Ubuntu 16.04+
 # sudo apt install libsecret-tools
+# secret-tool store --label='oa jenkins' jenkins ci
 # secret-tool store --label='oa jenkins' jenkins ci user dseynaeve
 
 # create connection

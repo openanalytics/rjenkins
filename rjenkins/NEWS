@@ -1,3 +1,7 @@
+0.0.6
+    o convenience install_jenkins function that matches devtools/remotes
+      format and allows to install R packages listed as job artifacts
+    o allow specifying credentials in multiple ways
 0.0.5
     o S3-based package structure with object for jenkins server/connection and
       an object for job
