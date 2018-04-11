@@ -11,9 +11,9 @@ jenkinsAuth(user, token)
 
 jenkinsAuthEnv(userVar = "JENKINS_USER", tokenVar = "JENKINS_TOKEN")
 
-jenkinsAuthKeyringr()
+jenkinsAuthKeyringr(user, host = "localhost")
 
-jenkinsAuthFile(file)
+jenkinsAuthFile(credentialsFile = ".jenkins-credentials")
 }
 \arguments{
 \item{user}{user to connect with}
@@ -24,7 +24,9 @@ jenkinsAuthFile(file)
 
 \item{tokenVar}{environment variable with token}
 
-\item{file}{connection or filename}
+\item{host}{jenkins host identifier}
+
+\item{credentialsFile}{connection or filename}
 }
 \value{
 credentials; object of class \code{jenkinsCredentials}
@@ -36,7 +38,8 @@ function arguments.
 \code{jenkinsAuthEnv} source credentials from environment
 variables
 
-\code{jenkinsAuthKeyringr} use the keyringr package
+\code{jenkinsAuthKeyringr} use the \code{keyringr} package to lookup
+an user password.
 
 \code{jenkinsAuthFile} source credentials from file
 }

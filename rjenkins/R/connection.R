@@ -4,7 +4,6 @@
 ###############################################################################
 
 
-
 #' Connect to a Jenkins Server
 #' @description Create a connection object for the Jenkins API. Credentials
 #' must be specified either directly or through a configuration object.
@@ -14,7 +13,8 @@
 #' @param auth authentication credentials obtained via \code{\link{jenkinsAuth}}
 #' @return object of class \code{jenkinsConnection}
 #' @export
-jenkinsConnection <- function(host, user = NULL, token = NULL, auth = NULL) {
+jenkinsConnection <- function(host = "localhost", user = NULL, token = NULL,
+    auth = NULL) {
   
   if (!is.null(auth)) {
     user <- auth$user
@@ -33,20 +33,24 @@ jenkinsConnection <- function(host, user = NULL, token = NULL, auth = NULL) {
 
 #' Show a Jenkins Object
 #' @description Display information about a jenkins object.
-#' @template jenkinsOp
+#' @param x connection to a jenkins instance. Result of \code{\link{jenkinsConnection}} 
+#' @param ... further arguments; not used
 #' @export
-print.jenkinsConnection <- function(conn) {
+print.jenkinsConnection <- function(x, ...) {
   
-  cat(sprintf("<jenkins server with url: %s>", conn$host))
+  cat(sprintf("<jenkins server with url: %s>", x$host))
   
 }
 
 #' Print summary information about the Jenkins Server
-#' @template jenkinsOp
+#' @param object connection to a jenkins instance. Result of \code{\link{jenkinsConnection}}
+#' @param ... further arguments; not used
 #' @export
-summary.jenkinsConnection <- function(conn) {
+summary.jenkinsConnection <- function(object, ...) {
 
 	# TODO: what to do here?
+  
+  stop("not yet implemented")
 
 }
 
@@ -94,7 +98,7 @@ hasJob <- function(conn, jobName) {
 
 #' Create a crumb header
 #' @param crumb result of \link{crumbRequest}
-#' @return request header, argument to \link{httr::POST}
+#' @return request header, argument to \code{\link[httr]{POST}}
 #' @importFrom stats setNames
 #' @importFrom httr add_headers
 #' @export
@@ -109,8 +113,8 @@ crumbHeader <- function(crumb) {
 #' Request a crumb
 #' @description Request a crumb to deal with CSRF Protection
 #' @template jenkinsOp
-#' @references \link{https://wiki.jenkins.io/display/JENKINS/Remote+access+API#RemoteaccessAPI-CSRFProtection}
-#' @return crumb as \link{character()}
+#' @references https://wiki.jenkins.io/display/JENKINS/Remote+access+API#RemoteaccessAPI-CSRFProtection
+#' @return crumb as \code{character()}
 #' @importFrom httr modify_url authenticate GET content stop_for_status
 #' @export
 crumbRequest <- function(conn) {
@@ -134,7 +138,7 @@ crumbRequest <- function(conn) {
 #' @param config job xml specification given either as a file path or an object
 #' of class \code{xml_document} from the \code{xml2} package
 #' @seealso \link{crumbRequest}
-#' @seealso \link{xml2::read_xml}
+#' @seealso \code{\link[xml2]{read_xml}}
 #' @importFrom httr modify_url authenticate POST content_type_xml
 #' @importFrom xml2 read_xml
 #' @return jenkins job

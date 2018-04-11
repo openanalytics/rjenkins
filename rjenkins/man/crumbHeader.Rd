@@ -10,7 +10,7 @@ crumbHeader(crumb)
 \item{crumb}{result of \link{crumbRequest}}
 }
 \value{
-request header, argument to \link{httr::POST}
+request header, argument to \code{\link[httr]{POST}}
 }
 \description{
 Create a crumb header

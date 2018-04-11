@@ -7,7 +7,7 @@
 hasJob(conn, jobName)
 }
 \arguments{
-\item{conn}{connection to a jenkins instance. Result of \link{jenkins}}
+\item{conn}{connection to a jenkins instance. Result of \code{\link{jenkinsConnection}}}
 
 \item{jobName}{job name}
 }

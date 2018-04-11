@@ -7,7 +7,7 @@
 createJob(conn, name, config)
 }
 \arguments{
-\item{conn}{connection to a jenkins instance. Result of \link{jenkins}}
+\item{conn}{connection to a jenkins instance. Result of \code{\link{jenkinsConnection}}}
 
 \item{name}{job name}
 
@@ -23,5 +23,5 @@ Creates a new job with given name and xml config.
 \seealso{
 \link{crumbRequest}
 
-\link{xml2::read_xml}
+\code{\link[xml2]{read_xml}}
 }

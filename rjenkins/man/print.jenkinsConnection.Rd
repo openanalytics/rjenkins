@@ -4,10 +4,12 @@
 \alias{print.jenkinsConnection}
 \title{Show a Jenkins Object}
 \usage{
-\method{print}{jenkinsConnection}(conn)
+\method{print}{jenkinsConnection}(x, ...)
 }
 \arguments{
-\item{conn}{connection to a jenkins instance. Result of \link{jenkins}}
+\item{x}{connection to a jenkins instance. Result of \code{\link{jenkinsConnection}}}
+
+\item{...}{further arguments; not used}
 }
 \description{
 Display information about a jenkins object.

@@ -4,10 +4,12 @@
 \alias{summary.jenkinsConnection}
 \title{Print summary information about the Jenkins Server}
 \usage{
-\method{summary}{jenkinsConnection}(conn)
+\method{summary}{jenkinsConnection}(object, ...)
 }
 \arguments{
-\item{conn}{connection to a jenkins instance. Result of \link{jenkins}}
+\item{object}{connection to a jenkins instance. Result of \code{\link{jenkinsConnection}}}
+
+\item{...}{further arguments; not used}
 }
 \description{
 Print summary information about the Jenkins Server

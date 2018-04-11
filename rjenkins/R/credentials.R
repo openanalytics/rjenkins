@@ -21,6 +21,7 @@ jenkinsAuth <- function(user, token) {
 #' variables
 #' @param userVar environment variable with user
 #' @param tokenVar environment variable with token
+#' @export
 jenkinsAuthEnv <- function(userVar = "JENKINS_USER",
     tokenVar = "JENKINS_TOKEN") {
   
@@ -30,20 +31,36 @@ jenkinsAuthEnv <- function(userVar = "JENKINS_USER",
   
 }
 #' @rdname jenkinsCredentials
-#' @description \code{jenkinsAuthKeyringr} use the keyringr package
-#' @importFrom keyringr decrypt_gk_pw
-jenkinsAuthKeyringr <- function() {
+#' @description \code{jenkinsAuthKeyringr} use the \code{keyringr} package to lookup
+#' an user password.
+#' @param host jenkins host identifier
+#' @export
+jenkinsAuthKeyringr <- function(user, host = "localhost") {
   
   jenkinsAuth(
-      user = decrypt_gk_pw("jenkins ci user default"),
-      token = decrypt_gk_pw(sprintf("jenkins ci token %s", user)))
+      user = user,
+      token = keyringr::decrypt_gk_pw(sprintf("jenkins %s user %s", host, user)))
   
 }
 #' @rdname jenkinsCredentials
 #' @description \code{jenkinsAuthFile} source credentials from file
-#' @param file connection or filename
-jenkinsAuthFile <- function(file) {
+#' @param credentialsFile connection or filename
+#' @export
+jenkinsAuthFile <- function(credentialsFile = ".jenkins-credentials") {
   
-  stop("not yet implemented")
+  # TODO: check if credentials file has proper permissions
+  
+  if (!inherits(file, "connection")) {
+    if (!file.exists(credentialsFile)) {
+      stop("credentials file not found")
+    }
+    fc <- file(credentialsFile) 
+  }
+  
+  res <- sapply(readLines(fc), strsplit, split = "=")
+  
+  jenkinsAuth(
+      user = res[[1]][2],
+      token = res[[2]][2])
   
 }

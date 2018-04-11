@@ -12,7 +12,9 @@ where build is optional and can be either a build number or a build ref.
 See \code{\link{JENKINS_BUILD_REFS}}. If no build is specified,
 \code{lastSuccessfulBuild} will be used.}
 
-\item{auth}{authentication credentials. See \link{jenkinsCredentials}}
+\item{auth}{authentication credentials as returned by \link{jenkinsAuth}.
+Can also be a named list, in which case the credentials under the name
+which matches the hostname in \code{uri} will be used.}
 }
 \value{
 package name (invisible)
@@ -21,7 +23,7 @@ package name (invisible)
 Convenience wrapper to \code{\link{installPackageArtifact}}
 }
 \examples{
-\dontRun{
+\dontrun{
 install_jenkins("https://ci.openanalytics.eu/packamon/packamon")
 }
 }

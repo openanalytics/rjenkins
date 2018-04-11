@@ -4,10 +4,12 @@
 \alias{summary.jenkinsJob}
 \title{Summarize Jenkins Job}
 \usage{
-\method{summary}{jenkinsJob}(job)
+\method{summary}{jenkinsJob}(object, ...)
 }
 \arguments{
-\item{job}{object of class \code{jenkinsJob} e.g. created using \code{\link{getJob}}}
+\item{object}{object of class \code{jenkinsJob} e.g. created using \code{\link{getJob}}}
+
+\item{...}{further arguments; not used}
 }
 \description{
 Get summary information for the given jenkins job

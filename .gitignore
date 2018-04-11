@@ -3,3 +3,5 @@
 /*tar.gz
 /rjenkins.pdf
 /.settings/
+/rjenkins/vignettes/*.html
+/*.Rcheck

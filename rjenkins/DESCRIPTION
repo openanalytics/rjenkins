@@ -1,13 +1,14 @@
 Package: rjenkins
 Type: Package
-Title: R Wrapper around the jenkins api with some extra oa-specific tools
+Title: Jenkins API client for R
 Version: 0.0.5
 Date: 2018-03-05
 Author: Daan Seynaeve
 Maintainer: Daan Seynaeve <daan.seynaeve@openanalytics.eu>
-Description: R Wrapper around the jenkins api with some extra oa-specific tools.
+Description: R wrapper around the jenkins API.
 License: file LICENSE
-Imports: httr, xml2, utils, stats, packamon
+Imports: httr, xml2, utils, stats, methods
+Enhances: remotes
 Suggests: knitr, keyringr
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr

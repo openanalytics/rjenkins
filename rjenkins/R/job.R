@@ -14,7 +14,7 @@
 #' \item \code{lastSuccessfulBuild}
 #' \item \code{lastUnsuccessfulBuild}
 #' }
-#' @seealso \link{https://wiki.jenkins.io/display/JENKINS/Terminology}
+#' @references https://wiki.jenkins.io/display/JENKINS/Terminology
 #' @export
 JENKINS_BUILD_REFS <- c("lastBuild", "lastCompletedBuild", "lastFailedBuild",
     "lastStableBuild", "lastSuccessfulBuild", "lastUnsuccessfulBuild")
@@ -35,13 +35,15 @@ jenkinsJob <- function(conn, name) {
 
 #' Summarize Jenkins Job
 #' @description Get summary information for the given jenkins job
-#' @template jenkinsJobOp
+#' @param object object of class \code{jenkinsJob} e.g. created using \code{\link{getJob}}
+#' @param ... further arguments; not used
+#' @importFrom methods show
 #' @export
-summary.jenkinsJob <- function(job) {
+summary.jenkinsJob <- function(object, ...) {
   
-  info <- getJobInfo(job)
-  history <- getBuildHistory(job)
-  artifacts <- listArtifacts(job, build = "lastSuccessfulBuild")
+  info <- getJobInfo(object)
+  history <- getBuildHistory(object)
+  artifacts <- listArtifacts(object, build = "lastSuccessfulBuild")
   
   cat("Job:\t", info$displayName, "\n")
   cat("\t\t", info$description, "\n")
@@ -85,7 +87,7 @@ getJobInfo <- function(job) {
 #' @template jenkinsJobOp
 #' @param depth maximum number of builds to list
 #' @return \code{data.frame} where each row corresponds to one build
-#' @importFrom xml2 xml_children xml_text
+#' @importFrom xml2 xml_children xml_text xml_child
 #' @export
 getBuildHistory <- function(job, depth = 3) {
   
@@ -145,7 +147,8 @@ listArtifacts <- function(job, build = JENKINS_BUILD_REFS) {
 
 #' Schedule a Build
 #' @template jenkinsJobOp
-#' @param params build parameters; currently not supported yet.
+#' @param params build parameters; currently not supported yet. FIXME
+#' @importFrom httr http_status
 #' @export
 scheduleBuild <- function(job, params = NULL) {
   
@@ -169,6 +172,8 @@ scheduleBuild <- function(job, params = NULL) {
 schedulePoll <- function(job) {
   
   # FIXME
+  
+  stop("not yet implemented")
   
 }
 

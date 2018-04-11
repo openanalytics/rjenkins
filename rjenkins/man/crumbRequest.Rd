@@ -7,14 +7,14 @@
 crumbRequest(conn)
 }
 \arguments{
-\item{conn}{connection to a jenkins instance. Result of \link{jenkins}}
+\item{conn}{connection to a jenkins instance. Result of \code{\link{jenkinsConnection}}}
 }
 \value{
-crumb as \link{character()}
+crumb as \code{character()}
 }
 \description{
 Request a crumb to deal with CSRF Protection
 }
 \references{
-\link{https://wiki.jenkins.io/display/JENKINS/Remote+access+API#RemoteaccessAPI-CSRFProtection}
+https://wiki.jenkins.io/display/JENKINS/Remote+access+API#RemoteaccessAPI-CSRFProtection
 }

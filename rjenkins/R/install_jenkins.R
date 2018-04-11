@@ -9,35 +9,45 @@
 #' where build is optional and can be either a build number or a build ref. 
 #' See \code{\link{JENKINS_BUILD_REFS}}. If no build is specified,
 #' \code{lastSuccessfulBuild} will be used. 
-#' @param auth authentication credentials. See \link{jenkinsCredentials}
+#' @param auth authentication credentials as returned by \link{jenkinsAuth}.
+#' Can also be a named list, in which case the credentials under the name
+#' which matches the hostname in \code{uri} will be used.
 #' @return package name (invisible)
 #' @examples
-#' \dontRun{
+#' \dontrun{
 #' install_jenkins("https://ci.openanalytics.eu/packamon/packamon")
 #' }
 #' @export
 install_jenkins <- function(uri, auth = jenkinsAuthEnv()) {
   
+  # parse uri
   pattern <- "^(.*)/(.*)/([a-zA-Z0-9.]{2,})(#(.)+)?$"
-  
-  grepl(pattern, uri)
-  
   parts <- list(
       host = gsub(pattern, "\\1", uri),
       jobName = gsub(pattern, "\\2", uri),
       pkgName = gsub(pattern, "\\2", uri),
       build = gsub(pattern, "\\5", uri))
   
+  # determine build ref
   if(nchar(parts$build) == 0) {
     parts$build <- "lastSuccessfulBuild"
   } 
-  
   if(grepl("^[0-9]+$", parts$build)) {
     parts$build <- as.numeric(parts$build)
   } else {
     parts$build <- match.arg(parts$build, JENKINS_BUILD_REFS)
   }
   
+  # match proper credentials with uri host
+  if (is.list(auth)) {
+    if (!any(names(auth) == parts$host)) {
+      stop("cannot find matching credentials")
+    }
+    
+    auth <- auth[[parts$host]]
+  }
+  
+  # find and install package
   conn <- jenkinsConnection(parts$host, auth = auth)
   
   job <- getJob(conn, parts$jobName)
@@ -69,7 +79,7 @@ install_jenkins <- function(uri, auth = jenkinsAuthEnv()) {
 #' ##                  archive      name version
 #' ## 1 eightFive_3.4-3.tar.gz eightFive   3.4-3
 #' ## 3      test_1.3-2.tar.gz      test   1.3-2
-#' @seealso \link{https://cran.r-project.org/doc/manuals/r-devel/R-exts.html#Creating-R-packages}
+#' @references https://cran.r-project.org/doc/manuals/r-devel/R-exts.html#Creating-R-packages
 #' @export
 extractPackageArchives <- function(artifacts, latestOnly = TRUE,
     archivePattern = "^([a-zA-Z0-9.]{2,})_([0-9]+\\.[0-9]+[.-][0-9]+)\\.tar\\.gz$") {

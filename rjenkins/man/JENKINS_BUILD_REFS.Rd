@@ -21,7 +21,7 @@ The following are valid build references: \itemize{
 \item \code{lastUnsuccessfulBuild}
 }
 }
-\seealso{
-\link{https://wiki.jenkins.io/display/JENKINS/Terminology}
+\references{
+https://wiki.jenkins.io/display/JENKINS/Terminology
 }
 \keyword{datasets}

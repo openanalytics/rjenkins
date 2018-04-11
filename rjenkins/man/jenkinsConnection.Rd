@@ -4,7 +4,8 @@
 \alias{jenkinsConnection}
 \title{Connect to a Jenkins Server}
 \usage{
-jenkinsConnection(host, user = NULL, token = NULL, auth = NULL)
+jenkinsConnection(host = "localhost", user = NULL, token = NULL,
+  auth = NULL)
 }
 \arguments{
 \item{host}{jenkins endpoint}

@@ -32,6 +32,6 @@ show(extractPackageArchives(artifacts))
 ## 1 eightFive_3.4-3.tar.gz eightFive   3.4-3
 ## 3      test_1.3-2.tar.gz      test   1.3-2
 }
-\seealso{
-\link{https://cran.r-project.org/doc/manuals/r-devel/R-exts.html#Creating-R-packages}
+\references{
+https://cran.r-project.org/doc/manuals/r-devel/R-exts.html#Creating-R-packages
 }
