@@ -101,7 +101,7 @@ extractPackageArchives <- function(artifacts, latestOnly = TRUE,
   
 }
 
-#' Install a Package from Jenkins
+#' Install Packages from Jenkins
 #' @description Install build artifacts exported from a jenkins job as R packages.
 #' @template jenkinsJobOp
 #' @param artifacts \code{character()} vector or artifact name(s) that should be
@@ -120,7 +120,7 @@ extractPackageArchives <- function(artifacts, latestOnly = TRUE,
 #' @importFrom httr modify_url GET authenticate write_disk
 #' @importFrom utils install.packages
 #' @export
-installPackageArtifact <- function(
+installPackageArtifacts <- function(
     job,
     artifacts = listArtifacts(job, "lastSuccessfulBuild"),
     build = JENKINS_BUILD_REFS,
