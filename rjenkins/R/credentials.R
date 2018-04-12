@@ -1,7 +1,3 @@
-# All things authentication
-# 
-# Author: Daan Seynaeve
-###############################################################################
 
 #' Jenkins Authentication Credentials
 #' @rdname jenkinsCredentials

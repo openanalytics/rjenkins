@@ -1,7 +1,3 @@
-# Jenkins job-level operations
-# 
-# Author: Daan Seynaeve
-###############################################################################
 
 #' Possible Jenkins Build Refs
 #' @description a \code{character()} vector containing all possible build references

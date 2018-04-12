@@ -1,8 +1,3 @@
-# Jenkins top-level operations
-# 
-# Author: Daan Seynaeve
-###############################################################################
-
 
 #' Connect to a Jenkins Server
 #' @description Create a connection object for the Jenkins API. Credentials

@@ -1,7 +1,3 @@
-# Jenkins R package installation tools
-# 
-# Author: Daan Seynaeve
-###############################################################################
 
 #' Install a Package from Jenkins
 #' @description Convenience wrapper to \code{\link{installPackageArtifact}}
