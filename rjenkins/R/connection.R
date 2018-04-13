@@ -2,14 +2,19 @@
 #' Connect to a Jenkins Server
 #' @description Create a connection object for the Jenkins API. Credentials
 #' must be specified either directly or through a configuration object.
-#' @param host jenkins endpoint
+#' @param url jenkins endpoint
 #' @param user user to connect with
 #' @param token token to use for authentication
 #' @param auth authentication credentials obtained via \code{\link{jenkinsAuth}}
+#' @importFrom httr parse_url
 #' @return object of class \code{jenkinsConnection}
 #' @export
-jenkinsConnection <- function(host = "localhost", user = NULL, token = NULL,
-    auth = NULL) {
+jenkinsConnection <- function(url = "http://localhost", user = NULL,
+    token = NULL, auth = NULL) {
+  
+  if (!any(parse_url(url)$scheme == c("https", "http"))) {
+    warning("Unsupported scheme")
+  }
   
   if (!is.null(auth)) {
     user <- auth$user
@@ -19,7 +24,7 @@ jenkinsConnection <- function(host = "localhost", user = NULL, token = NULL,
   if (is.null(user) || is.null(token)) stop("missing credentials")
   
   structure(
-      list(host = host,
+      list(host = url,
           user = user,
           token = token),
       class = c("jenkinsConnection", "list"))
