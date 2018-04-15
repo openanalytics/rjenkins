@@ -57,6 +57,7 @@ summary.jenkinsConnection <- function(object, ...) {
 #' List all jobs names
 #' @template jenkinsOp
 #' @importFrom httr modify_url GET authenticate content
+#' @importFrom xml2 as_list
 #' @export
 listJobs <- function(conn) {
   
@@ -153,7 +154,7 @@ createJob <- function(conn, name, config) {
   url <- modify_url(conn$host,
       path = "createItem",
       query = list(name = name))
-  
+
   response <- POST(url, authenticate(conn$user, conn$token),
       content_type_xml(),
       crumbHeader(crumbRequest(conn)),
@@ -165,5 +166,46 @@ createJob <- function(conn, name, config) {
   
 }
 
+
+#' Get the Build Queue
+#' @description Get a summary of queued job builds
+#' @template jenkinsOp
+#' @return Queued job builds summary as a \code{data.frame} or \code{NULL} if
+#' the queue is empty.
+#' @importFrom httr GET authenticate content
+#' @importFrom xml2 xml_text xml_children xml_find_first
+#' @export
+getBuildQueue <- function(conn) {
+  
+  # TODO: trim unneeded info with xpath
+  
+  url <- modify_url(conn$host,
+      path = c("queue", "api", "xml"))
+  
+  response <- GET(url, authenticate(conn$user, conn$token))
+  
+  result <- content(response)
+  
+  if (length(xml_children(result) == 0)) {
+    
+    return(NULL)
+    
+  } else {
+    
+    parseChild <- function(x) data.frame(stringsAsFactors = FALSE,
+          jobName = xml_text(xml_find_first(x, "task/name")),
+          inQueueSince = as.numeric(xml_text(xml_find_first(x, "inQueueSince"))),
+          shortDescription = xml_text(xml_find_first(x, "shortDescription")))
+    
+    queue <- do.call(rbind, lapply(xml_children(result), parseChild))
+    
+    queue$inQueueSince <- as.POSIXct(as.numeric(queue$inQueueSince)/1000,
+        origin="1970-01-01")
+    
+    return(queue)
+    
+  }
+  
+}
 
 

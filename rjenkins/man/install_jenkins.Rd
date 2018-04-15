@@ -20,7 +20,7 @@ which matches the hostname in \code{uri} will be used.}
 package name (invisible)
 }
 \description{
-Convenience wrapper to \code{\link{installPackageArtifact}}
+Convenience wrapper to \code{\link{installPackageArtifacts}}
 }
 \examples{
 \dontrun{

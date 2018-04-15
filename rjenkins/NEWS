@@ -1,5 +1,6 @@
 0.1.0
     o remove extraneous functionality
+    o ability to get the build queue
 0.0.6
     o convenience install_jenkins function that matches devtools/remotes
       format and allows to install R packages listed as job artifacts

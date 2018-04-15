@@ -1,6 +1,6 @@
 
 #' Install a Package from Jenkins
-#' @description Convenience wrapper to \code{\link{installPackageArtifact}}
+#' @description Convenience wrapper to \code{\link{installPackageArtifacts}}
 #' @param uri resource identifier, formatted \code{<url>/<job>/<package>[#build]},
 #' where build is optional and can be either a build number or a build ref. 
 #' See \code{\link{JENKINS_BUILD_REFS}}. If no build is specified,
@@ -50,7 +50,7 @@ install_jenkins <- function(uri, auth = jenkinsAuthEnv()) {
   
   archives <- extractPackageArchives(listArtifacts(job))
 
-  installPackageArtifact(job = job,
+  installPackageArtifacts(job = job,
       artifacts = archives$archive[archives$name == parts$pkgName])
   
   invisible(parts$pkgName)
