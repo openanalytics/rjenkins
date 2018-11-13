@@ -8,7 +8,8 @@
 jenkinsPipeline <- function(pipelineExpr) {
   
   blocks <- list(
-      pipeline = blockOp("pipeline")
+      pipeline = blockOp("pipeline"),
+      always = blockOp("always")
   )
   
   sections <- list(
@@ -19,7 +20,8 @@ jenkinsPipeline <- function(pipelineExpr) {
   
   directives <- list(
       agent = agentDirective,
-      stage = stageDirective
+      stage = stageDirective,
+      docker = dockerDirective
   )
   
   steps <- list(
@@ -34,6 +36,18 @@ jenkinsPipeline <- function(pipelineExpr) {
   # TODO escaping
   # structure(eval(pipelineExpr, envir), class = "Jenkinsfile") 
   
+}
+
+#' Docker Directive
+#' @desription DSL helper function
+#' @return \code{character()}
+dockerDirective <- function(image, args = NULL) {
+  b <- blockOp("docker")
+  
+  if (is.null(args)) 
+    b(step("image", image))
+  else 
+    b(step("image", image), step("args", args))
 }
 
 #' Agent Directive
