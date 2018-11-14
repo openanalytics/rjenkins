@@ -34,7 +34,7 @@ pipeline {
             archiveArtifacts artifacts: '*.tar.gz, *.pdf', fingerprint: true
         }
         success {
-            sh '''
+            sh '''#!/bin/bash
 set +x
 
 TOKEN=$(printf "$RDEPOT_CREDENTIALS" | base64 -w 0)
