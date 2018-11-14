@@ -1,0 +1,13 @@
+check_package_structure=false
+install_remotes_dependencies=false
+install_dependencies=true
+create_roxygen_documentation=true
+check_package=true
+build_package=true
+build_reference_manual=false
+add_reference_manual_to_tar=false
+install_package=true
+load_package=true
+list_installed_packages=false
+write_docker_file=false
+write_session_info=false
