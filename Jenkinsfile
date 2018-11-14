@@ -31,7 +31,7 @@ pipeline {
     
     
         always {
-            archiveArtifacts artifacts: '*.tar.gz', fingerprint: true
+            archiveArtifacts artifacts: '*.tar.gz, *.pdf', fingerprint: true
         }
         success {
             sh '''
