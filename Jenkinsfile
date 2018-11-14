@@ -1,8 +1,6 @@
 pipeline {
 
-    agent none
-    
-        triggers {
+    triggers {
         pollSCM('H/15 * * * *')
     }
     
@@ -20,8 +18,8 @@ pipeline {
         }
     }
     post {
-        agent any
         always {
+            agent any
             archiveArtifacts artifacts: '*.tar.gz', fingerprint: true
         }
     }
