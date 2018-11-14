@@ -20,6 +20,7 @@ pipeline {
         }
     }
     post {
+        agent any
         always {
             archiveArtifacts artifacts: '*.tar.gz', fingerprint: true
         }
