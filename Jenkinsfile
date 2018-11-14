@@ -21,7 +21,7 @@ pipeline {
     }
     post {
         success {
-            archiveArtifacts artifacts: '*.tar.gz, *.pdf', fingerprint: true
+            archiveArtifacts artifacts: '*.tar.gz', fingerprint: true
         }
     }
     
