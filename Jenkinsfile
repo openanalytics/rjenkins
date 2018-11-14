@@ -1,6 +1,6 @@
 pipeline {
 
-    agent none
+    agent any
     
     options {
         buildDiscarder(logRotator(numToKeepStr: '3'))
@@ -25,7 +25,6 @@ pipeline {
     }
     post {
         always {
-            agent any
             archiveArtifacts artifacts: '*.tar.gz', fingerprint: true
         }
     }
