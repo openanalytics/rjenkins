@@ -6,7 +6,7 @@
 #' @param remote the git remote repository to check out
 #' @param credentialsId credentials used to scan branches and check out sources
 #' @return jenkins job
-#' @importFrom xml2 xml_child xml_text read_xml
+#' @importFrom xml2 xml_child xml_text read_xml xml_text<-
 #' @export
 createMultiBranchPipeline <- function(
     conn,
