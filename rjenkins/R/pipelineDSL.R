@@ -9,7 +9,8 @@ jenkinsPipeline <- function(pipelineExpr) {
   
   blocks <- list(
       pipeline = blockOp("pipeline"),
-      always = blockOp("always")
+      always = blockOp("always"),
+      triggers = blockOp("triggers")
   )
   
   sections <- list(
@@ -39,7 +40,7 @@ jenkinsPipeline <- function(pipelineExpr) {
 }
 
 #' Docker Directive
-#' @desription DSL helper function
+#' @description DSL helper function
 #' @return \code{character()}
 dockerDirective <- function(image, args = NULL) {
   b <- blockOp("docker")

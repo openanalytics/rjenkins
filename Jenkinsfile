@@ -1,5 +1,11 @@
 pipeline {
+
     agent none
+    
+        triggers {
+        pollSCM('H/15 * * * *')
+    }
+    
     stages {
         stage('Build') {
             agent {
@@ -13,9 +19,10 @@ pipeline {
         }
     }
     post {
-        always {
+        success {
             archiveArtifacts artifacts: '*.tar.gz, *.pdf', fingerprint: true
         }
     }
+    
 }
 

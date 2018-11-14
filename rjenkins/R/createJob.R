@@ -1,4 +1,33 @@
 
+#' Create a new MultiBranch Pipeline
+#' @description Creates a new multibranch pipeline with given name and
+#' git remote details.
+#' @param name multibranch pipeline name
+#' @param remote the git remote repository to check out
+#' @param credentialsId credentials used to scan branches and check out sources
+#' @return jenkins job
+#' @importFrom xml2 xml_child xml_text read_xml
+#' @export
+createMultiBranchPipeline <- function(
+    conn,
+    name,
+    remote,
+    credentialsId) {
+  
+  config <- read_xml(
+      system.file("extdata", "template", "MultiBranchProject.xml", package = "rjenkins"))
+  
+  urlNode <- xml_child(config, "sources/data/*/source/remote")
+  xml_text(urlNode) <- remote
+  
+  credIdNode <- xml_child(config, "sources/data/*/source/credentialsId")
+  xml_text(credIdNode) <- credentialsId
+  
+  createJob(conn, name, config)
+  
+}
+
+
 #' Create a new job
 #' @description Creates a new job with given name and xml config.
 #' @template jenkinsOp

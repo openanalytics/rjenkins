@@ -44,7 +44,7 @@ test_that("simple pipeline", {
               stages(
                   stage("Build",
                       steps(
-                          echo("hello"),
+                          echo("hello")
                       )
                   )
               )

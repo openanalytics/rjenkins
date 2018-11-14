@@ -10,5 +10,5 @@ dockerDirective(image, args = NULL)
 \code{character()}
 }
 \description{
-Docker Directive
+DSL helper function
 }
