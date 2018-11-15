@@ -1,4 +1,88 @@
 
+#' Block
+#' @description DSL helper function
+#' @param header block header
+#' @return closure
+blockOp <- function(header) {
+  force(header)
+  
+  function(...) {
+    args <- list(...)
+    
+    paste0(
+        header, " {\n",
+        if (length(args) > 0)
+          paste(indentLines(endLines(as.vector(args, "character"))), collapse = ""),
+        "}\n")
+  }
+}
+
+#' Pipeline sections
+#' @description DSL helper functions
+#' @export
+pipelineSections <- list(
+    stages = blockOp("stages"),
+    steps = blockOp("steps"),
+    post = blockOp("post")
+)
+
+#' Pipeline directives
+#' @description DSL helper functions
+#' @export
+pipelineDirectives <- list(
+    
+    triggers = function(...) {
+      triggers <- list(
+          cron = function(x) naryOp(1, c("cron(", ")"))(formatParameter(x)),
+          pollSCM = function(x) naryOp(1, c("pollSCM(", ")"))(formatParameter(x))
+      )
+      do.call(
+          blockOp("triggers"),
+          eval(substitute(list(...)),
+              list2env(triggers, parent = parent.frame())))
+    },
+    
+    options = function(...) {
+      options <- list(
+          buildDiscarder = naryOp(1, c("buildDiscarder(", ")")),
+          logRotator = function(numToKeepStr) {
+            sprintf("logRotator(numToKeepStr: %s)", formatParameter(numToKeepStr))
+          }
+      )
+      envir <- list2env(options, parent = parent.frame())
+      do.call(
+          blockOp("options"),
+          eval(substitute(list(...)), envir))
+    },
+    
+    docker = function(image, args = NULL) {
+      b <- blockOp("docker")
+      
+      if (is.null(args)) 
+        b(step("image", image))
+      else 
+        b(step("image", image), step("args", args))
+    },
+    
+    agent = function(...) {
+      args <- list(...)
+      if (length(args) == 1 &&
+          is.character(args[[1]]) &&
+          any(args[[1]] == c("any", "none"))) {
+        paste0("agent ", args[[1]], "\n")
+      } else {
+        blockOp("agent")(...)
+      }
+    },
+    
+    stage = function(stageName, ...) {
+      
+      blockOp(sprintf("stage(%s)", formatParameter(stageName)))(...)
+      
+    }
+    
+)
+
 #' Generate Declarative Jenkins Pipeline syntax from a pipeline expression
 #' @description TODO refer to Jenkins 2 book
 #' @rdname pipeline
@@ -7,101 +91,24 @@
 #' @export
 jenkinsPipeline <- function(pipelineExpr) {
   
-  blocks <- list(
+  others <- list(
       pipeline = blockOp("pipeline"),
-      always = blockOp("always")
-  )
-  
-  sections <- list(
-      stages = sectionOp("stages"),
-      steps = sectionOp("steps"),
-      post = sectionOp("post")
-  )
-  
-  directives <- list(
-      agent = agentDirective,
-      stage = stageDirective,
-      docker = dockerDirective,
-      options = optionsDirective,
-      triggers = triggersDirective
-  )
-  
-  steps <- list(
+      always = blockOp("always"),
       echo = stepOp("echo"),
       step = step
   )
   
-  envir <- list2env(c(blocks, sections, directives, steps), parent = parent.frame())
+  envir <- list2env(c(
+          pipelineSections,
+          pipelineDirectives,
+          others),
+      parent = parent.frame())
   
   eval(substitute(pipelineExpr), envir)
   
   # TODO escaping
   # structure(eval(pipelineExpr, envir), class = "Jenkinsfile") 
   
-}
-
-#' Triggers Directive
-#' @description DSL helper function
-#' @return \code{character()}
-triggersDirective <- function(...) {
-  
-  triggers <- list(
-      cron = function(x) naryOp(1, c("cron(", ")"))(formatParameter(x)),
-      pollSCM = function(x) naryOp(1, c("pollSCM(", ")"))(formatParameter(x))
-  )
-  
-  envir <- list2env(triggers, parent = parent.frame())
-  
-  do.call(
-      blockOp("triggers"),
-      eval(substitute(list(...)), envir))
-  
-}
-
-#' Option Directive
-#' @description DSL helper function
-#' @return \code{character()}
-optionsDirective <- function(...) {
-  
-  options <- list(
-      buildDiscarder = naryOp(1, c("buildDiscarder(", ")")),
-      logRotator = function(numToKeepStr) {
-        sprintf("logRotator(numToKeepStr: %s)", formatParameter(numToKeepStr))
-      }
-  )
-  
-  envir <- list2env(options, parent = parent.frame())
-  
-  do.call(
-      blockOp("options"),
-      eval(substitute(list(...)), envir))
-  
-}
-
-#' Docker Directive
-#' @description DSL helper function
-#' @return \code{character()}
-dockerDirective <- function(image, args = NULL) {
-  b <- blockOp("docker")
-  
-  if (is.null(args)) 
-    b(step("image", image))
-  else 
-    b(step("image", image), step("args", args))
-}
-
-#' Agent Directive
-#' @description DSL helper function
-#' @return \code{character()}
-agentDirective <- function(...) {
-  args <- list(...)
-  if (length(args) == 1 &&
-      is.character(args[[1]]) &&
-      any(args[[1]] == c("any", "none"))) {
-    paste0("agent ", args[[1]], "\n")
-  } else {
-    blockOp("agent")(...)
-  }
 }
 
 #' Format arguments and parameters
@@ -151,17 +158,6 @@ step <- function(name, ...) {
 #' @return closure
 stepOp <- function(name) function(...) step(name, ...)
 
-
-#' Stage Directive
-#' @description DSL helper function
-#' @param stageName stage name
-#' @return \code{character()}
-stageDirective <- function(stageName, ...) {
-  
-  blockOp(sprintf("stage(%s)", formatParameter(stageName)))(...)
-  
-}
-
 #' Indent lines
 #' @description DSL helper function
 #' @param texts \code{character()} vector of text snippets ending in a newline
@@ -182,31 +178,6 @@ indentLines <- function(text, indent = "    ") {
 endLines <- function(texts) {
   ifelse(!grepl("\n$", texts), paste0(texts, "\n"), texts)
 }
-
-#' Block
-#' @description DSL helper function
-#' @param header block header
-#' @return closure
-blockOp <- function(header) {
-  force(header)
-  
-  function(...) {
-    args <- list(...)
-    
-    paste0(
-        header, " {\n",
-        if (length(args) > 0)
-          paste(indentLines(endLines(as.vector(args, "character"))), collapse = ""),
-        "}\n")
-  }
-}
-
-#' Section
-#' @description DSL helper function
-#' @param name section name
-#' @return closure
-sectionOp <- function(name) blockOp(name)
-
 
 #' Right-Variadic operator
 #' @description DSL helper function

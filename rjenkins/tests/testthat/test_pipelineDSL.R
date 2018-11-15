@@ -55,25 +55,67 @@ test_that("simple pipeline", {
       
     })
 
+testdata$complex_pipeline <- "pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '3'))
+    }
+    triggers {
+        pollSCM('H/15 * * * *')
+    }
+    stages {
+        stage('Build') {
+            agent {
+                docker {
+                    image 'some/image'
+                }
+            }
+            steps {
+                sh 'script.sh'
+            }
+        }
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: '*.tar.gz, *.pdf', fingerprint: true
+        }
+    }
+}
+"
+
 test_that("complex pipeline", {
       
-      skip("needs revision")
-      
-      pipeline(
-          agent("any"),
-          environment(
-              BUILD_IMAGE = 'registry.openanalytics.eu/private/packamon'
-          ),
-          stages(
-              stage('Build',
-                  agent(
-                      docker(
-                          image = 'registry.openanalytics.eu/private/packamon',
-                          args = '-v $WORKSPACE:/workspace -w /workspace --env-file $WORKSPACE/stages.list')
+      x <- jenkinsPipeline(
+          pipeline(
+              agent("any"),
+              options(
+                  buildDiscarder(logRotator(numToKeepStr = "3"))
+              ),
+              triggers(
+                  pollSCM("H/15 * * * *")
+              ),
+              stages(
+                  stage("Build",
+                      agent(
+                          docker(
+                              image = "some/image"
+                          )
+                      ),
+                      steps(
+                          step("sh", "script.sh")
+                      )
+                  )
+              ),
+              post(
+                  always(
+                      step("archiveArtifacts",
+                          artifacts = "*.tar.gz, *.pdf",
+                          fingerprint = TRUE)
                   )
               )
           )
       )
       
+      expect_identical(x, testdata$complex_pipeline)
+      
     })
-
