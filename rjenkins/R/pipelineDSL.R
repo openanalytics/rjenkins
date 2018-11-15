@@ -9,8 +9,7 @@ jenkinsPipeline <- function(pipelineExpr) {
   
   blocks <- list(
       pipeline = blockOp("pipeline"),
-      always = blockOp("always"),
-      triggers = blockOp("triggers")
+      always = blockOp("always")
   )
   
   sections <- list(
@@ -22,7 +21,9 @@ jenkinsPipeline <- function(pipelineExpr) {
   directives <- list(
       agent = agentDirective,
       stage = stageDirective,
-      docker = dockerDirective
+      docker = dockerDirective,
+      options = optionsDirective,
+      triggers = triggersDirective
   )
   
   steps <- list(
@@ -30,12 +31,50 @@ jenkinsPipeline <- function(pipelineExpr) {
       step = step
   )
   
-  envir <- list2env(c(blocks, sections, directives, steps), parent = emptyenv())
+  envir <- list2env(c(blocks, sections, directives, steps), parent = parent.frame())
   
   eval(substitute(pipelineExpr), envir)
   
   # TODO escaping
   # structure(eval(pipelineExpr, envir), class = "Jenkinsfile") 
+  
+}
+
+#' Triggers Directive
+#' @description DSL helper function
+#' @return \code{character()}
+triggersDirective <- function(...) {
+  
+  triggers <- list(
+      cron = function(x) naryOp(1, c("cron(", ")"))(formatParameter(x)),
+      pollSCM = function(x) naryOp(1, c("pollSCM(", ")"))(formatParameter(x))
+  )
+  
+  envir <- list2env(triggers, parent = parent.frame())
+  
+  do.call(
+      blockOp("triggers"),
+      eval(substitute(list(...)), envir))
+  
+}
+
+#' Option Directive
+#' @description DSL helper function
+#' @return \code{character()}
+optionsDirective <- function(...) {
+  
+  options <- list(
+      buildDiscarder = naryOp(1, c("buildDiscarder(", ")")),
+      logRotator = function(numToKeepStr) {
+        sprintf("logRotator(numToKeepStr: %s)", formatParameter(numToKeepStr))
+      }
+  )
+  
+  envir <- list2env(options, parent = parent.frame())
+  
+  do.call(
+      blockOp("options"),
+      eval(substitute(list(...)), envir))
   
 }
 
@@ -124,7 +163,7 @@ stageDirective <- function(stageName, ...) {
 }
 
 #' Indent lines
-#' @description block header
+#' @description DSL helper function
 #' @param texts \code{character()} vector of text snippets ending in a newline
 #' @return \code{character()}
 indentLines <- function(text, indent = "    ") {
@@ -134,6 +173,14 @@ indentLines <- function(text, indent = "    ") {
   
   paste0(indent, gsub("\n(.{1})", sprintf("\n%s\\1", indent), text))
   
+}
+
+#' Add newlines to the end of text snippets
+#' @description DSL helper function
+#' @param texts \code{character()} vector of text snippets
+#' @return \code{character()}
+endLines <- function(texts) {
+  ifelse(!grepl("\n$", texts), paste0(texts, "\n"), texts)
 }
 
 #' Block
@@ -149,7 +196,7 @@ blockOp <- function(header) {
     paste0(
         header, " {\n",
         if (length(args) > 0)
-          paste(indentLines(as.vector(args, "character")), collapse = ""),
+          paste(indentLines(endLines(as.vector(args, "character"))), collapse = ""),
         "}\n")
   }
 }
