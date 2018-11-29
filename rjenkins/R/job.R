@@ -15,19 +15,7 @@
 JENKINS_BUILD_REFS <- c("lastBuild", "lastCompletedBuild", "lastFailedBuild",
     "lastStableBuild", "lastSuccessfulBuild", "lastUnsuccessfulBuild")
 
-#' Get a jenkins job
-#' @description Create an object representing a jenkins job.
-#' @template jenkinsOp
-#' @param name job name
-#' @export
-jenkinsJob <- function(conn, name) {
-  
-  structure(
-      list(conn = conn,
-          name = name),
-      class = c("jenkinsJob", "list"))
-  
-}
+
 
 #' Summarize Jenkins Job
 #' @description Get summary information for the given jenkins job
@@ -193,5 +181,30 @@ getBuildLog <- function(job, build = JENKINS_BUILD_REFS, start = 0) {
   response <- GET(url, authenticate(job$conn$user, job$conn$token))
   
   content(response)
+  
+}
+
+#' @rdname listJobs
+#' @template jenkinsJobOp
+#' @export
+listJobs.jenkinsJob <- function(job) {
+  
+  url <- modify_url(job$conn$host,
+      path = c("job", job$name, "api", "xml"),
+      query = list(xpath = "/*/job/name", wrapper = "jobs"))
+  
+  response <- GET(url, authenticate(conn$user, conn$token))
+  
+  unlist(as_list(content(response)), use.names = FALSE)
+  
+}
+
+#' @rdname getJob
+#' @export
+getJob.jenkinsJob <- function(x, name) {
+  
+  jenkinsJob(
+      conn = x$conn,
+      name = sprintf("%s/job/%s", x$name, name))
   
 }

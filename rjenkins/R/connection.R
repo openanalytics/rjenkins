@@ -48,51 +48,7 @@ print.jenkinsConnection <- function(x, ...) {
 #' @export
 summary.jenkinsConnection <- function(object, ...) {
 
-	# TODO: what to do here?
-  
-  stop("not yet implemented")
-
-}
-
-#' List all jobs names
-#' @template jenkinsOp
-#' @importFrom httr modify_url GET authenticate content
-#' @importFrom xml2 as_list
-#' @export
-listJobs <- function(conn) {
-  
-  url <- modify_url(conn$host,
-      path  = c("api", "xml"),
-      query = list(xpath = "/*/job/name", wrapper = "jobs"))
-  
-  response <- GET(url, authenticate(conn$user, conn$token))
-  
-  unlist(as_list(content(response)), use.names = FALSE)
-  
-}
-
-#' Find a job on jenkins
-#' @template jenkinsOp
-#' @param name job name
-#' @return object of class \code{jenkinsJob}
-#' @export
-getJob <- function(conn, name) {
-  
-  if (!hasJob(conn, name)) {
-    stop("Job with given name does not exist on the jenkins server.")
-  }
-  
-  jenkinsJob(conn, name)
-   
-}
-
-#' Check if a job with given name exists
-#' @template jenkinsOp
-#' @param jobName job name
-#' @export
-hasJob <- function(conn, jobName) {
-  
-  any(listJobs(conn) == jobName)
+	print(object, ...)
   
 }
 
@@ -173,4 +129,40 @@ getBuildQueue <- function(conn) {
   
 }
 
+#' @rdname getJob
+#' @export
+getJob.jenkinsConnection <- function(x, name) {
+  
+  jenkinsJob(x, name)
+  
+}
 
+#' @rdname listJobs
+#' @importFrom httr modify_url GET authenticate content
+#' @importFrom xml2 as_list
+#' @export
+listJobs.jenkinsConnection <- function(x) {
+  
+  url <- modify_url(x$host,
+      path  = c("api", "xml"),
+      query = list(xpath = "/*/job/name", wrapper = "jobs"))
+  
+  response <- GET(url, authenticate(x$user, x$token))
+  
+  unlist(as_list(content(response)), use.names = FALSE)
+  
+}
+
+#' Get a jenkins job
+#' @description Create an object representing a jenkins job.
+#' @template jenkinsOp
+#' @param name job name
+#' @export
+jenkinsJob <- function(conn, name) {
+  
+  structure(
+      list(conn = conn,
+          name = name),
+      class = c("jenkinsJob", "list"))
+  
+}
