@@ -187,13 +187,13 @@ getBuildLog <- function(job, build = JENKINS_BUILD_REFS, start = 0) {
 #' @rdname listJobs
 #' @template jenkinsJobOp
 #' @export
-listJobs.jenkinsJob <- function(job) {
+listJobs.jenkinsJob <- function(x) {
   
-  url <- modify_url(job$conn$host,
-      path = c("job", job$name, "api", "xml"),
+  url <- modify_url(x$conn$host,
+      path = c("job", x$name, "api", "xml"),
       query = list(xpath = "/*/job/name", wrapper = "jobs"))
   
-  response <- GET(url, authenticate(conn$user, conn$token))
+  response <- GET(url, authenticate(x$conn$user, x$conn$token))
   
   unlist(as_list(content(response)), use.names = FALSE)
   

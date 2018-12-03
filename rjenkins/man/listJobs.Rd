@@ -10,7 +10,7 @@
 
 listJobs(x, ...)
 
-\method{listJobs}{jenkinsJob}(job)
+\method{listJobs}{jenkinsJob}(x)
 }
 \arguments{
 \item{x}{object to list jobs for}
