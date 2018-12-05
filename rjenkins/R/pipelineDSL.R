@@ -7,7 +7,7 @@ blockOp <- function(header) {
   force(header)
   
   function(...) {
-    args <- list(...)
+    args <- Filter(Negate(is.null), list(...))
     
     paste0(
         header, " {\n",
@@ -16,6 +16,41 @@ blockOp <- function(header) {
         "}\n")
   }
 }
+
+#' Step
+#' @description DSL helper function
+#' @param name step name
+#' @return \code{character()}
+#' @examples \dontrun{
+#' step("a", foo = 4, "5", bar = 77, foobar = FALSE)
+#' }
+step <- function(name, ...) {
+  
+  args <- list(...)
+  
+  if (length(args) == 0) {
+    paste0(name, "\n")
+  } else {
+    argStr <- sapply(args, formatParameter)
+    argNames <- if (is.null(names(args))) rep("", length(args)) else names(args)
+    paste0(
+        name,
+        " ",
+        paste(collapse = ", ",
+            ifelse(argNames == "",
+                yes = argStr,
+                no = sprintf("%s: %s", argNames, argStr))),
+        "\n")
+  }
+}
+
+#' Step
+#' @description DSL helper function
+#' @param name step name
+#' @return closure
+stepOp <- function(name) function(...) step(name, ...)
+
+
 
 #' Pipeline sections
 #' @description DSL helper functions
@@ -55,13 +90,20 @@ pipelineDirectives <- list(
           eval(substitute(list(...)), envir))
     },
     
-    docker = function(image, args = NULL) {
-      b <- blockOp("docker")
-      
-      if (is.null(args)) 
-        b(step("image", image))
-      else 
-        b(step("image", image), step("args", args))
+    docker = function(image = NULL, args = NULL, label = NULL,
+        reuseNode = NULL, customWorkspace = NULL, registryUrl = NULL,
+        registryCredentialsId = NULL, alwaysPull = NULL) {
+      do.call(blockOp("docker"),
+          Filter(Negate(is.null), list(
+                  if (!is.null(image)) step("image", image),
+                  if (!is.null(args)) step("args", args),
+                  if (!is.null(label)) step("label", label),
+                  if (!is.null(reuseNode)) step("reuseNode", reuseNode),
+                  if (!is.null(customWorkspace)) step("customWorkspace", customWorkspace),
+                  if (!is.null(registryCredentialsId)) step("registryCredentialsId", registryCredentialsId),
+                  if (!is.null(registryUrl)) step("registryUrl", registryUrl),
+                  if (!is.null(alwaysPull)) step("alwaysPull", alwaysPull)
+                  )))
     },
     
     agent = function(...) {
@@ -124,39 +166,6 @@ formatParameter <- function(value) {
     sprintf("'%s'", value)
   }
 }
-
-#' Step
-#' @description DSL helper function
-#' @param name step name
-#' @return \code{character()}
-#' @examples \dontrun{
-#' step("a", foo = 4, "5", bar = 77, foobar = FALSE)
-#' }
-step <- function(name, ...) {
-  
-  args <- list(...)
-  
-  if (length(args) == 0) {
-    paste0(name, "\n")
-  } else {
-    argStr <- sapply(args, formatParameter)
-    argNames <- if (is.null(names(args))) rep("", length(args)) else names(args)
-    paste0(
-        name,
-        " ",
-        paste(collapse = ", ",
-            ifelse(argNames == "",
-                yes = argStr,
-                no = sprintf("%s: %s", argNames, argStr))),
-        "\n")
-  }
-}
-
-#' Step
-#' @description DSL helper function
-#' @param name step name
-#' @return closure
-stepOp <- function(name) function(...) step(name, ...)
 
 #' Indent lines
 #' @description DSL helper function
