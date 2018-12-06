@@ -7,7 +7,9 @@
 indentLines(text, indent = "    ")
 }
 \arguments{
-\item{texts}{\code{character()} vector of text snippets ending in a newline}
+\item{text}{\code{character()} vector of text snippets ending in a newline}
+
+\item{indent}{\code{character()} string to indent with}
 }
 \value{
 \code{character()}

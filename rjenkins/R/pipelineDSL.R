@@ -20,6 +20,7 @@ blockOp <- function(header) {
 #' Step
 #' @description DSL helper function
 #' @param name step name
+#' @param ... step arguments
 #' @return \code{character()}
 #' @examples \dontrun{
 #' step("a", foo = 4, "5", bar = 77, foobar = FALSE)
@@ -169,7 +170,8 @@ formatParameter <- function(value) {
 
 #' Indent lines
 #' @description DSL helper function
-#' @param texts \code{character()} vector of text snippets ending in a newline
+#' @param text \code{character()} vector of text snippets ending in a newline
+#' @param indent \code{character()} string to indent with
 #' @return \code{character()}
 indentLines <- function(text, indent = "    ") {
   

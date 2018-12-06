@@ -8,7 +8,7 @@
 \usage{
 \method{getJob}{jenkinsConnection}(x, name)
 
-getJob(x, name, ...)
+getJob(x, name)
 
 \method{getJob}{jenkinsJob}(x, name)
 }

@@ -2,7 +2,7 @@
 #' Create a new MultiBranch Pipeline
 #' @description Creates a new multibranch pipeline with given name and
 #' git remote details.
-#' @param name multibranch pipeline name
+#' @inheritParams createJob
 #' @param remote the git remote repository to check out
 #' @param credentialsId credentials used to scan branches and check out sources
 #' @return jenkins job

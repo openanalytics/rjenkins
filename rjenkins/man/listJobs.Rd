@@ -8,14 +8,12 @@
 \usage{
 \method{listJobs}{jenkinsConnection}(x)
 
-listJobs(x, ...)
+listJobs(x)
 
 \method{listJobs}{jenkinsJob}(x)
 }
 \arguments{
 \item{x}{object to list jobs for}
-
-\item{job}{object of class \code{jenkinsJob} e.g. created using \code{\link{getJob}}}
 }
 \description{
 S3 generic

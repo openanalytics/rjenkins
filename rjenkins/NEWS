@@ -1,3 +1,8 @@
+0.3.0
+    o support for nested jobs (folders, multibranch projects)
+0.2.0
+    o pipeline DSL
+    o create Multibranch pipeline based on template
 0.1.0
     o remove extraneous functionality
     o ability to get the build queue

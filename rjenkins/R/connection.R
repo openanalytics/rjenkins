@@ -38,7 +38,7 @@ jenkinsConnection <- function(url = "http://localhost", user = NULL,
 #' @export
 print.jenkinsConnection <- function(x, ...) {
   
-  cat(sprintf("<jenkins server with url: %s>", x$host))
+  cat(sprintf("<jenkins server with url: %s>\n", x$host))
   
 }
 
@@ -133,7 +133,15 @@ getBuildQueue <- function(conn) {
 #' @export
 getJob.jenkinsConnection <- function(x, name) {
   
-  jenkinsJob(x, name)
+  jenkinsJob(x, sprintf("job/%s", escapeJenkinsItemName(name)))
+  
+}
+
+#' @rdname browse
+#' @export
+browse.jenkinsConnection <- function(x, ...) {
+  
+  browseURL(modify_url(x$host), ...)
   
 }
 
@@ -153,16 +161,9 @@ listJobs.jenkinsConnection <- function(x) {
   
 }
 
-#' Get a jenkins job
-#' @description Create an object representing a jenkins job.
-#' @template jenkinsOp
-#' @param name job name
-#' @export
-jenkinsJob <- function(conn, name) {
-  
-  structure(
-      list(conn = conn,
-          name = name),
-      class = c("jenkinsJob", "list"))
-  
+#' Ensure that names are safe to build URL's with
+#' @param name item name
+#' @return safe item name
+escapeJenkinsItemName <- function(name) {
+  gsub("/", "%2F", name)
 }

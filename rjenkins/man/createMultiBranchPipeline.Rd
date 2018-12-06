@@ -7,7 +7,9 @@
 createMultiBranchPipeline(conn, name, remote, credentialsId)
 }
 \arguments{
-\item{name}{multibranch pipeline name}
+\item{conn}{connection to a jenkins instance. Result of \code{\link{jenkinsConnection}}}
+
+\item{name}{job name}
 
 \item{remote}{the git remote repository to check out}
 

@@ -7,6 +7,8 @@
 hasJob(x, name)
 }
 \arguments{
+\item{x}{object to check jobs for}
+
 \item{name}{job name}
 }
 \description{

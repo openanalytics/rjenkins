@@ -8,6 +8,8 @@ step(name, ...)
 }
 \arguments{
 \item{name}{step name}
+
+\item{...}{step arguments}
 }
 \value{
 \code{character()}
