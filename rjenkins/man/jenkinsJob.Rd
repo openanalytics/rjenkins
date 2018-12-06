@@ -2,14 +2,16 @@
 % Please edit documentation in R/job.R
 \name{jenkinsJob}
 \alias{jenkinsJob}
-\title{Get a jenkins job}
+\title{Jenkins Job}
 \usage{
-jenkinsJob(conn, name)
+jenkinsJob(conn, name, parent = NULL)
 }
 \arguments{
 \item{conn}{connection to a jenkins instance. Result of \code{\link{jenkinsConnection}}}
 
 \item{name}{job name}
+
+\item{parent}{(optional) parent job}
 }
 \description{
 Create an object representing a jenkins job.

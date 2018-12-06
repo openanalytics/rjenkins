@@ -5,3 +5,4 @@
 /.settings/
 /rjenkins/vignettes/*.html
 /*.Rcheck
+/example.R

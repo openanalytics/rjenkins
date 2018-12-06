@@ -5,8 +5,9 @@
 \title{Install Packages from Jenkins}
 \usage{
 installPackageArtifacts(job, artifacts = listArtifacts(job,
-  "lastSuccessfulBuild"), build = JENKINS_BUILD_REFS, latestOnly = TRUE,
-  tmpDir = normalizePath(file.path("~", "Downloads")), ...)
+  "lastSuccessfulBuild"), build = JENKINS_BUILD_REFS,
+  latestOnly = TRUE, tmpDir = normalizePath(file.path("~",
+  "Downloads")), ...)
 }
 \arguments{
 \item{job}{object of class \code{jenkinsJob} e.g. created using \code{\link{getJob}}}

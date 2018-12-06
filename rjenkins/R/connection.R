@@ -38,7 +38,7 @@ jenkinsConnection <- function(url = "http://localhost", user = NULL,
 #' @export
 print.jenkinsConnection <- function(x, ...) {
   
-  cat(sprintf("<jenkins server with url: %s>", x$host))
+  cat(sprintf("<jenkins server with url: %s>\n", x$host))
   
 }
 
@@ -48,51 +48,7 @@ print.jenkinsConnection <- function(x, ...) {
 #' @export
 summary.jenkinsConnection <- function(object, ...) {
 
-	# TODO: what to do here?
-  
-  stop("not yet implemented")
-
-}
-
-#' List all jobs names
-#' @template jenkinsOp
-#' @importFrom httr modify_url GET authenticate content
-#' @importFrom xml2 as_list
-#' @export
-listJobs <- function(conn) {
-  
-  url <- modify_url(conn$host,
-      path  = c("api", "xml"),
-      query = list(xpath = "/*/job/name", wrapper = "jobs"))
-  
-  response <- GET(url, authenticate(conn$user, conn$token))
-  
-  unlist(as_list(content(response)), use.names = FALSE)
-  
-}
-
-#' Find a job on jenkins
-#' @template jenkinsOp
-#' @param name job name
-#' @return object of class \code{jenkinsJob}
-#' @export
-getJob <- function(conn, name) {
-  
-  if (!hasJob(conn, name)) {
-    stop("Job with given name does not exist on the jenkins server.")
-  }
-  
-  jenkinsJob(conn, name)
-   
-}
-
-#' Check if a job with given name exists
-#' @template jenkinsOp
-#' @param jobName job name
-#' @export
-hasJob <- function(conn, jobName) {
-  
-  any(listJobs(conn) == jobName)
+	print(object, ...)
   
 }
 
@@ -131,41 +87,6 @@ crumbRequest <- function(conn) {
   content(response)
   
 }
-
-#' Create a new job
-#' @description Creates a new job with given name and xml config.
-#' @template jenkinsOp
-#' @param name job name
-#' @param config job xml specification given either as a file path or an object
-#' of class \code{xml_document} from the \code{xml2} package
-#' @seealso \link{crumbRequest}
-#' @seealso \code{\link[xml2]{read_xml}}
-#' @importFrom httr modify_url authenticate POST content_type_xml
-#' @importFrom xml2 read_xml
-#' @return jenkins job
-#' @export
-createJob <- function(conn, name, config) {
-  
-  if (!inherits(config, "xml_document")) {
-    stopifnot(file.exists(config))
-    config <- read_xml(config)
-  }
-  
-  url <- modify_url(conn$host,
-      path = "createItem",
-      query = list(name = name))
-
-  response <- POST(url, authenticate(conn$user, conn$token),
-      content_type_xml(),
-      crumbHeader(crumbRequest(conn)),
-      body = as.character(config))
-  
-  stop_for_status(response)
-  
-  jenkinsJob(conn, name)
-  
-}
-
 
 #' Get the Build Queue
 #' @description Get a summary of queued job builds
@@ -208,4 +129,41 @@ getBuildQueue <- function(conn) {
   
 }
 
+#' @rdname getJob
+#' @export
+getJob.jenkinsConnection <- function(x, name) {
+  
+  jenkinsJob(x, sprintf("job/%s", escapeJenkinsItemName(name)))
+  
+}
 
+#' @rdname browse
+#' @export
+browse.jenkinsConnection <- function(x, ...) {
+  
+  browseURL(modify_url(x$host), ...)
+  
+}
+
+#' @rdname listJobs
+#' @importFrom httr modify_url GET authenticate content
+#' @importFrom xml2 as_list
+#' @export
+listJobs.jenkinsConnection <- function(x) {
+  
+  url <- modify_url(x$host,
+      path  = c("api", "xml"),
+      query = list(xpath = "/*/job/name", wrapper = "jobs"))
+  
+  response <- GET(url, authenticate(x$user, x$token))
+  
+  unlist(as_list(content(response)), use.names = FALSE)
+  
+}
+
+#' Ensure that names are safe to build URL's with
+#' @param name item name
+#' @return safe item name
+escapeJenkinsItemName <- function(name) {
+  gsub("/", "%2F", name)
+}
