@@ -157,6 +157,8 @@ listJobs.jenkinsConnection <- function(x) {
   
   response <- GET(url, authenticate(x$user, x$token))
   
+  stop_for_status(response)
+  
   unlist(as_list(content(response)), use.names = FALSE)
   
 }
