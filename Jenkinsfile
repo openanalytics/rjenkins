@@ -29,6 +29,7 @@ pipeline {
                 }
             }
             steps {
+                sd 'pwd'
                 sh '/usr/local/bin/packamon.sh'
             }
         }
