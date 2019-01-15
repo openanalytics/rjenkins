@@ -10,15 +10,18 @@ pipeline {
         pollSCM('H/15 * * * *')
     }
     
+    parameters {
+        string(name: 'NOTIFY_CHANNEL', defaultValue: '@dseynaeve', description: 'Rocket.Chat channel to notify')
+    }
+    
     environment {
         RDEPOT_CREDENTIALS = credentials('eae5688d-c858-4757-a17f-65b68ca771da')
-        NOTIFY_CHANNEL = '@dseynaeve'
     }
     
     stages {
         stage('Notify') {
             steps {
-                rocketSend channel: "${env.NOTIFY_CHANNEL}", message: "Build Started - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
+                rocketSend channel: "${params.NOTIFY_CHANNEL}", message: "Build Started - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
             }
         }
         stage('Build') {
@@ -58,11 +61,11 @@ curl -X POST \
   
 set -x
             '''
-            rocketSend channel: "${env.NOTIFY_CHANNEL}", message: "Build Successful - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
+            rocketSend channel: "${params.NOTIFY_CHANNEL}", message: "Build Successful - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
         
         }
         failure {
-            rocketSend channel: "${env.NOTIFY_CHANNEL}", message: "Build Failed - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
+            rocketSend channel: "${params.NOTIFY_CHANNEL}", message: "Build Failed - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
         }
 
 
