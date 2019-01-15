@@ -25,7 +25,6 @@ pipeline {
             agent {
                 docker {
                     image 'registry.openanalytics.eu/private/packamon'
-                    args '--env-file $WORKSPACE/stages.list'
                     reuseNode true
                 }
             }
