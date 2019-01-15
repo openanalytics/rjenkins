@@ -203,8 +203,8 @@ scheduleBuild <- function(job, params = NULL) {
   
   if (!is.null(params)) {
     
-    if (!is.list(params) || is.null(names(params)))
-      stop("build paramaters should be given as a named list")
+    if (!is.list(params) || length(names(params)) != length(params))
+      stop("build parameters should be given as a named list")
     
     url <- modify_url(job$conn$host, path = c(job$name, "buildWithParameters"))
     body <- params
@@ -221,7 +221,28 @@ scheduleBuild <- function(job, params = NULL) {
       crumbHeader(crumbRequest(job$conn)),
       body = body)
   
-  http_status(response)
+  if (status_code(response) == 400 && is.null(params)) {
+    
+    parametersQueryReponse <- GET(modify_url(job$conn$host, path = c(job$name, "api", "xml")),
+        authenticate(job$conn$user, job$conn$token),
+        query = list(
+            xpath = "/*/property[@_class='hudson.model.ParametersDefinitionProperty']",
+            wrapper = "matches"))
+    
+    stop_for_status(parametersQueryReponse)
+    
+    if (length(xml_children(content(parametersQueryReponse))) == 1) {
+      warning("The job is parametrized but NULL was supplied; retrying with an empty list")
+      scheduleBuild(job, list())
+    } else {
+      http_status(response)
+    }
+    
+  } else {
+    
+    http_status(response)
+    
+  }
   
 }
 
