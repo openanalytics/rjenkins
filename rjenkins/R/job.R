@@ -203,8 +203,7 @@ scheduleBuild <- function(job, params = NULL) {
   
   if (!is.null(params)) stop("build parameters are not supported yet") # FIXME
   
-  url <- modify_url(job$conn$host,
-      path = c("job", job$name, "build"))
+  url <- modify_url(job$conn$host, path = c(job$name, "build"))
   
   response <- POST(url,
       authenticate(job$conn$user, job$conn$token),
