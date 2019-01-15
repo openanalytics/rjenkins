@@ -196,18 +196,30 @@ listArtifacts <- function(job, build = JENKINS_BUILD_REFS) {
 
 #' Schedule a Build
 #' @template jenkinsJobOp
-#' @param params build parameters; currently not supported yet. FIXME
+#' @param params build parameters; named list
 #' @importFrom httr http_status
 #' @export
 scheduleBuild <- function(job, params = NULL) {
   
-  if (!is.null(params)) stop("build parameters are not supported yet") # FIXME
-  
-  url <- modify_url(job$conn$host, path = c(job$name, "build"))
+  if (!is.null(params)) {
+    
+    if (!is.list(params) || is.null(names(params)))
+      stop("build paramaters should be given as a named list")
+    
+    url <- modify_url(job$conn$host, path = c(job$name, "buildWithParameters"))
+    body <- params
+    
+  } else {
+    
+    url <- modify_url(job$conn$host, path = c(job$name, "build"))
+    body <- NULL
+    
+  }
   
   response <- POST(url,
       authenticate(job$conn$user, job$conn$token),
-      crumbHeader(crumbRequest(job$conn)))
+      crumbHeader(crumbRequest(job$conn)),
+      body = body)
   
   http_status(response)
   
