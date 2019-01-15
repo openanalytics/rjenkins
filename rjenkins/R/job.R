@@ -196,21 +196,53 @@ listArtifacts <- function(job, build = JENKINS_BUILD_REFS) {
 
 #' Schedule a Build
 #' @template jenkinsJobOp
-#' @param params build parameters; currently not supported yet. FIXME
+#' @param params build parameters; named list
 #' @importFrom httr http_status
 #' @export
 scheduleBuild <- function(job, params = NULL) {
   
-  if (!is.null(params)) stop("build parameters are not supported yet") # FIXME
-  
-  url <- modify_url(job$conn$host,
-      path = c("job", job$name, "build"))
+  if (!is.null(params)) {
+    
+    if (!is.list(params) || length(names(params)) != length(params))
+      stop("build parameters should be given as a named list")
+    
+    url <- modify_url(job$conn$host, path = c(job$name, "buildWithParameters"))
+    body <- params
+    
+  } else {
+    
+    url <- modify_url(job$conn$host, path = c(job$name, "build"))
+    body <- NULL
+    
+  }
   
   response <- POST(url,
       authenticate(job$conn$user, job$conn$token),
-      crumbHeader(crumbRequest(job$conn)))
+      crumbHeader(crumbRequest(job$conn)),
+      body = body)
   
-  http_status(response)
+  if (status_code(response) == 400 && is.null(params)) {
+    
+    parametersQueryReponse <- GET(modify_url(job$conn$host, path = c(job$name, "api", "xml")),
+        authenticate(job$conn$user, job$conn$token),
+        query = list(
+            xpath = "/*/property[@_class='hudson.model.ParametersDefinitionProperty']",
+            wrapper = "matches"))
+    
+    stop_for_status(parametersQueryReponse)
+    
+    if (length(xml_children(content(parametersQueryReponse))) == 1) {
+      warning("The job is parametrized but NULL was supplied; retrying with an empty list")
+      scheduleBuild(job, list())
+    } else {
+      http_status(response)
+    }
+    
+  } else {
+    
+    http_status(response)
+    
+  }
   
 }
 
@@ -261,6 +293,8 @@ listJobs.jenkinsJob <- function(x) {
   
   response <- GET(url, authenticate(x$conn$user, x$conn$token))
   
+  stop_for_status(response)
+  
   unlist(as_list(content(response)), use.names = FALSE)
   
 }
@@ -273,5 +307,17 @@ getJob.jenkinsJob <- function(x, name) {
       conn = x$conn,
       name = sprintf("%s/job/%s", x$name, escapeJenkinsItemName(name)),
       parent = x)
+  
+}
+
+#' @rdname hasJob
+#' @export
+hasJob.jenkinsJob <- function(x, name) {
+  
+  url <- modify_url(x$conn$host, path = c(x$name, "job", name))
+  
+  response <- HEAD(url, authenticate(x$conn$user, x$conn$token))
+  
+  status_code(response) == 200
   
 }

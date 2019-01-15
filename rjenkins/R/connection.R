@@ -157,6 +157,8 @@ listJobs.jenkinsConnection <- function(x) {
   
   response <- GET(url, authenticate(x$user, x$token))
   
+  stop_for_status(response)
+  
   unlist(as_list(content(response)), use.names = FALSE)
   
 }
@@ -166,4 +168,16 @@ listJobs.jenkinsConnection <- function(x) {
 #' @return safe item name
 escapeJenkinsItemName <- function(name) {
   gsub("/", "%2F", name)
+}
+
+#' @rdname hasJob
+#' @export
+hasJob.jenkinsConnection <- function(x, name) {
+  
+  url <- modify_url(x$host, path = c("job", name))
+  
+  response <- HEAD(url, authenticate(x$user, x$token))
+  
+  status_code(response) == 200
+  
 }

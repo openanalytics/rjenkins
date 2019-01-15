@@ -9,7 +9,7 @@ scheduleBuild(job, params = NULL)
 \arguments{
 \item{job}{object of class \code{jenkinsJob} e.g. created using \code{\link{getJob}}}
 
-\item{params}{build parameters; currently not supported yet. FIXME}
+\item{params}{build parameters; named list}
 }
 \description{
 Schedule a Build

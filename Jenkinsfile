@@ -10,20 +10,29 @@ pipeline {
         pollSCM('H/15 * * * *')
     }
     
+    parameters {
+        string(name: 'NOTIFY_CHANNEL', defaultValue: '@dseynaeve', description: 'Rocket.Chat channel to notify')
+    }
+    
     environment {
         RDEPOT_CREDENTIALS = credentials('eae5688d-c858-4757-a17f-65b68ca771da')
     }
     
     stages {
+        stage('Notify') {
+            steps {
+                rocketSend channel: "${params.NOTIFY_CHANNEL}", message: "Build Started - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
+            }
+        }
         stage('Build') {
             agent {
                 docker {
                     image 'registry.openanalytics.eu/private/packamon'
-                    args '--env-file $WORKSPACE/stages.list'
                     reuseNode true
                 }
             }
             steps {
+                sh 'pwd'
                 sh '/usr/local/bin/packamon.sh'
             }
         }
@@ -52,7 +61,13 @@ curl -X POST \
   
 set -x
             '''
+            rocketSend channel: "${params.NOTIFY_CHANNEL}", message: "Build Successful - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
+        
         }
+        failure {
+            rocketSend channel: "${params.NOTIFY_CHANNEL}", message: "Build Failed - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
+        }
+
 
     }
     
