@@ -44,12 +44,15 @@ getJob <- function(x, name) {
   
 }
 
-#' Check if a job with given name exists
+#' Check if a job exists
+#' @rdname hasJob
+#' @description S3 generic
 #' @param x object to check jobs for
 #' @param name job name
+#' @return \code{logical}
 #' @export
 hasJob <- function(x, name) {
   
-  any(listJobs(x) == escapeJenkinsItemName(name))
+  UseMethod("hasJob")
   
 }

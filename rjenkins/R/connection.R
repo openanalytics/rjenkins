@@ -169,3 +169,15 @@ listJobs.jenkinsConnection <- function(x) {
 escapeJenkinsItemName <- function(name) {
   gsub("/", "%2F", name)
 }
+
+#' @rdname hasJob
+#' @export
+hasJob.jenkinsConnection <- function(x, name) {
+  
+  url <- modify_url(x$host, path = c("job", name))
+  
+  response <- HEAD(url, authenticate(x$user, x$token))
+  
+  status_code(response) == 200
+  
+}

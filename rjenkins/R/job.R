@@ -276,3 +276,15 @@ getJob.jenkinsJob <- function(x, name) {
       parent = x)
   
 }
+
+#' @rdname hasJob
+#' @export
+hasJob.jenkinsJob <- function(x, name) {
+  
+  url <- modify_url(x$conn$host, path = c(x$name, "job", name))
+  
+  response <- HEAD(url, authenticate(x$conn$user, x$conn$token))
+  
+  status_code(response) == 200
+  
+}
