@@ -311,6 +311,7 @@ getJob.jenkinsJob <- function(x, name) {
 }
 
 #' @rdname hasJob
+#' @importFrom httr HEAD modify_url authenticate status_code
 #' @export
 hasJob.jenkinsJob <- function(x, name) {
   
