@@ -171,6 +171,7 @@ escapeJenkinsItemName <- function(name) {
 }
 
 #' @rdname hasJob
+#' @importFrom httr HEAD modify_url authenticate status_code
 #' @export
 hasJob.jenkinsConnection <- function(x, name) {
   
