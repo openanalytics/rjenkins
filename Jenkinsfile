@@ -50,7 +50,7 @@ set +x
 TOKEN=$(printf "$RDEPOT_CREDENTIALS" | base64 -w 0)
 
 curl -X POST \
-  "https://rdepot.openanalytics.eu/api/manager/packages" \
+  "https://rdepot-test.openanalytics.eu/api/manager/packages" \
   -H 'Accept: application/json' \
   -H "Authorization: Basic $TOKEN" \
   -H 'Content-Type: multipart/form-data' \

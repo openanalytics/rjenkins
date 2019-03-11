@@ -193,6 +193,20 @@ listArtifacts <- function(job, build = JENKINS_BUILD_REFS) {
   
 }
 
+#' Delete a job
+#' @template jenkinsJobOp
+#' @export
+deleteJob <- function(job) {
+  
+  url <- modify_url(job$conn$host, path = c(job$name, "doDelete"))
+  
+  response <- POST(url,
+      authenticate(job$conn$user, job$conn$token),
+      crumbHeader(crumbRequest(job$conn)))
+  
+  invisible()
+  
+}
 
 #' Schedule a Build
 #' @template jenkinsJobOp
