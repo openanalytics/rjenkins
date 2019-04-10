@@ -35,6 +35,7 @@ createPipeline <- function(
 #' @inheritParams createPipeline
 #' @return jenkins job
 #' @importFrom xml2 xml_child xml_text read_xml xml_text<-
+#' @importFrom openssl md5
 #' @export
 createMultiBranchPipeline <- function(
     conn,
@@ -45,6 +46,9 @@ createMultiBranchPipeline <- function(
   config <- read_xml(
       system.file("extdata", "template", "MultiBranchProject.xml",
           package = "rjenkins"))
+  
+  idNode <- xml_child(config, "sources/data/*/source/id")
+  xml_text(idNode) <- paste0("rjenkins-",md5(remote))
   
   urlNode <- xml_child(config, "sources/data/*/source/remote")
   xml_text(urlNode) <- remote
