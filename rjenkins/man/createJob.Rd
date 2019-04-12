@@ -18,10 +18,12 @@ of class \code{xml_document} from the \code{xml2} package}
 jenkins job
 }
 \description{
-Creates a new job with given name and xml config.
+Creates a new job with given name and xml config. Refer to
+\link{createMultiBranchPipeline} and \link{createPipeline} for more
+user-friendly wrappers.
 }
 \seealso{
-\link{crumbRequest}
+\link[xml2]{read_xml} \link{crumbRequest}
 
-\code{\link[xml2]{read_xml}}
+\link{createMultiBranchPipeline} \link{createPipeline}
 }

@@ -38,15 +38,7 @@
 		plugin="branch-api@2.0.20">
 		<data>
 			<jenkins.branch.BranchSource>
-				<source class="jenkins.plugins.git.GitSCMSource"
-					plugin="git@3.9.1">
-					<id>STUB</id>
-					<remote>STUB</remote>
-					<credentialsId>STUB</credentialsId>
-					<traits>
-						<jenkins.plugins.git.traits.BranchDiscoveryTrait />
-					</traits>
-				</source>
+			  <source>STUB</source>
 				<strategy
 					class="jenkins.branch.DefaultBranchPropertyStrategy">
 					<properties class="empty-list" />

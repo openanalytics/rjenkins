@@ -2,9 +2,16 @@
 % Please edit documentation in R/createJob.R
 \name{createMultiBranchPipeline}
 \alias{createMultiBranchPipeline}
+\alias{gitBranchSource}
+\alias{gitHubBranchSource}
 \title{Create a new MultiBranch Pipeline}
 \usage{
-createMultiBranchPipeline(conn, name, remote, credentialsId)
+createMultiBranchPipeline(conn, name, branchSource)
+
+gitBranchSource(remote, credentialsId)
+
+gitHubBranchSource(api, owner, repository, credentialsId,
+  sshCredentialsId = NULL)
 }
 \arguments{
 \item{conn}{connection to a jenkins instance. Result of \code{\link{jenkinsConnection}}}
@@ -14,11 +21,49 @@ createMultiBranchPipeline(conn, name, remote, credentialsId)
 \item{remote}{the git remote repository to check out}
 
 \item{credentialsId}{credentials used to scan branches and check out sources}
+
+\item{api}{GitHub api URI}
+
+\item{owner}{GitHub repository owner}
+
+\item{repository}{GitHub repository name}
+
+\item{sshCheckoutCredentialsId}{(optional) if not \code{NULL}, the id of the
+ssh credentials to use for the git checkout.}
 }
 \value{
 jenkins job
 }
 \description{
 Creates a new multibranch pipeline with given name and
-git remote details.
+git branch source. More info can be found \href{https://wiki.jenkins.io/display/JENKINS/Pipeline+Multibranch+Plugin}{here}.
+}
+\examples{
+
+if (interactive()) {
+  
+  # jc <- jenkinsConnection(...)
+  
+  if (hasJob(jc, "my-job"))
+    deleteJob(getJob(jc, "my-job"))
+  
+  createMultiBranchPipeline(
+      jc,
+      name = "my-job",
+      branchSource = gitBranchSource(
+          remote = "https://path/to/my_repository.git",
+          credentialsId = "credentials-to-use"))
+  
+  createMultiBranchPipeline(jc,
+      name = "my-job",
+      branchSource = gitHubBranchSource(
+          api = "https://api.github.com",
+          owner = "OpenAnalytics",
+          repository = "rjenkins",
+          credentialsId = "oajenkins-github"))
+  
+}
+}
+\seealso{
+\link{createPipeline} \link{createJob}
 }

@@ -22,3 +22,6 @@ jenkins job
 Creates a new pipeline job with given name and git remote
 details.
 }
+\seealso{
+\link{createMultiBranchPipeline} \link{createJob}
+}
