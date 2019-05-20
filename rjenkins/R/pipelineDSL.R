@@ -104,7 +104,15 @@ pipelineDirectives <- list(
                   if (!is.null(registryCredentialsId)) step("registryCredentialsId", registryCredentialsId),
                   if (!is.null(registryUrl)) step("registryUrl", registryUrl),
                   if (!is.null(alwaysPull)) step("alwaysPull", alwaysPull)
-                  )))
+              )))
+    },
+    
+    dockerfile = function(fileName = NULL, reuseNode = NULL) {
+      do.call(blockOp("dockerfile"),
+          Filter(Negate(is.null), list(
+                  if (!is.null(fileName)) step("fileName", fileName),
+                  if (!is.null(reuseNode)) step("reuseNode", reuseNode)
+              )))
     },
     
     agent = function(...) {
