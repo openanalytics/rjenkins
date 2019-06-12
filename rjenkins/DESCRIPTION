@@ -1,8 +1,8 @@
 Package: rjenkins
 Type: Package
-Title: Jenkins API client for R
+Title: Pipeline-oriented Jenkins Client for R
 Version: 0.4.0.900
-Date: 2019-01-15
+Date: 2019-06-12
 Author: Daan Seynaeve
 Maintainer: Daan Seynaeve <daan.seynaeve@openanalytics.eu>
 Description: R wrapper around the jenkins API.
