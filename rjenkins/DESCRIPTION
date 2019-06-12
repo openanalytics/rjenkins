@@ -6,7 +6,7 @@ Date: 2019-06-12
 Author: Daan Seynaeve
 Maintainer: Daan Seynaeve <daan.seynaeve@openanalytics.eu>
 Description: Create, manage and trigger Jenkins pipeline jobs.
-License: file LICENSE
+License: GPL-3
 Imports: httr, xml2, utils, stats, methods, openssl
 Enhances: remotes
 Suggests: knitr, keyringr, testthat
