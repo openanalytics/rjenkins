@@ -13,5 +13,5 @@ endLines(texts)
 \code{character()}
 }
 \description{
-DSL helper function
+Add newlines to the end of text snippets
 }

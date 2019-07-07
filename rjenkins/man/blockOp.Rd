@@ -13,5 +13,5 @@ blockOp(header)
 closure
 }
 \description{
-DSL helper function
+Block
 }

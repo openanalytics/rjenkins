@@ -1,14 +1,14 @@
 Package: rjenkins
 Type: Package
 Title: Pipeline-oriented Jenkins Client for R
-Version: 0.4.0.900
+Version: 0.5.0
 Date: 2019-06-12
 Author: Daan Seynaeve
 Maintainer: Daan Seynaeve <daan.seynaeve@openanalytics.eu>
 Description: Create, manage and trigger Jenkins pipeline jobs.
 License: GPL-3
-Imports: httr, xml2, utils, stats, methods, openssl
+Imports: httr, xml2, utils, stats, methods, openssl, curl
 Enhances: remotes
 Suggests: knitr, keyringr, testthat
-RoxygenNote: 6.1.1.9000
+RoxygenNote: 6.1.1
 VignetteBuilder: knitr

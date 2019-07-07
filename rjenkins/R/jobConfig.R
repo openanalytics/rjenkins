@@ -1,31 +1,61 @@
 
+tag <- function(name, ...) {
+  args <- list(...)
+  setNames(
+      list(if (is.null(names(args))) {
+                structure(list(...))
+              } else {
+                named <- names(args) != ""
+                do.call(structure, c(list(do.call(list, args[!named])), args[named]))
+              }),
+      name)
+}
+
 #' Create a new Pipeline
-#' @description Creates a new pipeline job with given name and git remote
-#' details.
-#' @inheritParams createJob
+#' @description Creates configuration for a pipeline job.
+#' @param pipeline inline pipeline; see \code{\link{jenkinsPipeline}}
 #' @param remote the git remote repository to check out
 #' @param credentialsId credentials used to scan branches and check out sources
-#' @return jenkins job
+#' @details If an inline \code{pipeline} is supplied, the \code{remote}
+#' argument will be ignored/
+#' @return XML document
 #' @seealso \link{createMultiBranchPipeline} \link{createJob}
-#' @importFrom xml2 xml_child xml_text read_xml xml_text<-
+#' @importFrom xml2 xml_child xml_text read_xml xml_text<- as_xml_document
 #' @export
-createPipeline <- function(
-    conn,
-    name,
+pipelineConfig <- function(
     remote,
-    credentialsId) {
+    credentialsId = NULL,
+    pipeline = NULL) {
   
-  config <- read_xml(
-      system.file("extdata", "template", "PipelineProject.xml",
-          package = "rjenkins"))
+  if (!is.null(pipeline)) {
+    
+    config <- as_xml_document(
+        tag("flow-definition", plugin = "workflow-job@2.32",
+            tag("actions"), 
+            tag("description"),
+            tag("keepDependencies", "false"),
+            tag("definition", .class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition", plugin="workflow-cps@2.70",
+                tag("script", pipeline)))
+    )
+    
+  } else {
+    
+    if (is.null(credentialsId))
+      stop("Please specify credentialsId")
+    
+    config <- read_xml(
+        system.file("extdata", "template", "PipelineProject.xml",
+            package = "rjenkins"))
+    
+    urlNode <- xml_child(config, "definition/scm/userRemoteConfigs/*/url")
+    xml_text(urlNode) <- remote
+    
+    credIdNode <- xml_child(config, "definition/scm/userRemoteConfigs/*/credentialsId")
+    xml_text(credIdNode) <- credentialsId
+    
+  }
   
-  urlNode <- xml_child(config, "definition/scm/userRemoteConfigs/*/url")
-  xml_text(urlNode) <- remote
-  
-  credIdNode <- xml_child(config, "definition/scm/userRemoteConfigs/*/credentialsId")
-  xml_text(credIdNode) <- credentialsId
-  
-  createJob(conn, name, config)
+  config
   
 }
 
@@ -33,16 +63,13 @@ createPipeline <- function(
 #' @rdname createMultiBranchPipeline
 #' @description Creates a new multibranch pipeline with given name and
 #' git branch source. More info can be found \href{https://wiki.jenkins.io/display/JENKINS/Pipeline+Multibranch+Plugin}{here}.
-#' @inheritParams createPipeline
-#' @return jenkins job
+#' @param credentialsId credentials used to scan branches and check out sources
+#' @return XML document
 #' @example inst/example/createMultiBranchPipeline.R
 #' @seealso \link{createPipeline} \link{createJob}
 #' @importFrom xml2 xml_child xml_text read_xml xml_text<- xml_root xml_replace
 #' @export
-createMultiBranchPipeline <- function(
-    conn,
-    name,
-    branchSource) {
+multibranchPipelineConfig <- function(branchSource) {
   
   config <- read_xml(
       system.file("extdata", "template", "MultiBranchProject.xml",
@@ -51,7 +78,7 @@ createMultiBranchPipeline <- function(
   branchSourceNode <- xml_child(config, "sources/data/*/source")
   xml_replace(branchSourceNode, xml_root(branchSource$config))
   
-  createJob(conn, name, config)
+  config
   
 }
 #' @rdname createMultiBranchPipeline
@@ -118,42 +145,5 @@ gitHubBranchSource <- function(
   }
   
   structure(list(config = config), class = "BranchSource")
-  
-}
-
-
-#' Create a new job
-#' @description Creates a new job with given name and xml config. Refer to
-#' \link{createMultiBranchPipeline} and \link{createPipeline} for more
-#' user-friendly wrappers.
-#' @template jenkinsOp
-#' @param name job name
-#' @param config job xml specification given either as a file path or an object
-#' of class \code{xml_document} from the \code{xml2} package
-#' @seealso \link[xml2]{read_xml} \link{crumbRequest}
-#' @seealso \link{createMultiBranchPipeline} \link{createPipeline}
-#' @importFrom httr modify_url authenticate POST content_type_xml
-#' @importFrom xml2 read_xml
-#' @return jenkins job
-#' @export
-createJob <- function(conn, name, config) {
-  
-  if (!inherits(config, "xml_document")) {
-    stopifnot(file.exists(config))
-    config <- read_xml(config)
-  }
-  
-  url <- modify_url(conn$host,
-      path = "createItem",
-      query = list(name = name))
-  
-  response <- POST(url, authenticate(conn$user, conn$token),
-      content_type_xml(),
-      crumbHeader(crumbRequest(conn)),
-      body = as.character(config))
-  
-  stop_for_status(response)
-  
-  jenkinsJob(conn, name)
   
 }

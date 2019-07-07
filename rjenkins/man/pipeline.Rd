@@ -2,9 +2,12 @@
 % Please edit documentation in R/pipelineDSL.R
 \name{jenkinsPipeline}
 \alias{jenkinsPipeline}
-\title{Generate Declarative Jenkins Pipeline syntax from a pipeline expression}
+\alias{pipeline}
+\title{Declarative Jenkins Pipeline}
 \usage{
-jenkinsPipeline(pipelineExpr)
+jenkinsPipeline(pipelineExpr = pipeline())
+
+pipeline(...)
 }
 \arguments{
 \item{pipelineExpr}{pipeline expression}
@@ -13,5 +16,31 @@ jenkinsPipeline(pipelineExpr)
 Declarative Pipeline syntax as a \code{character()}
 }
 \description{
-TODO refer to Jenkins 2 book
+Generate Declarative Jenkins Pipeline syntax from a pipeline expression.
+}
+\examples{
+
+if (interactive()) {
+  
+  x <- jenkinsPipeline(
+      pipeline(
+          agent("any"),
+          stages(
+              stage("Build", steps(echo("hello")))
+          )
+      )
+  )
+  
+  # shorthand
+  x <- pipeline(
+      agent("any"),
+      stages(
+          stage("Build", steps(echo("hello")))
+      )
+  )
+  
+}
+}
+\references{
+\url{https://jenkins.io/doc/book/pipeline/syntax/}
 }

@@ -13,5 +13,5 @@ formatParameter(value)
 \code{character()}
 }
 \description{
-DSL helper function
+Format arguments and parameters
 }

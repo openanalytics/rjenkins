@@ -9,6 +9,6 @@
 pipelineDirectives
 }
 \description{
-DSL helper functions
+Pipeline directives
 }
 \keyword{datasets}

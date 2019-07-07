@@ -19,6 +19,9 @@ rightVariadicOp(nf, nv, parts, left, sep, right)
 
 \item{right}{suffix for the variadic part}
 }
+\value{
+closure
+}
 \description{
-DSL helper function
+Right-Variadic operator
 }

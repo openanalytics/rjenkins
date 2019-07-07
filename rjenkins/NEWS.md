@@ -2,6 +2,8 @@
 
 * github branchsource support
 * refactored job creation
+* partial support for views
+* inline R expressions in pipeline DSL
 
 ## 0.4.0
 

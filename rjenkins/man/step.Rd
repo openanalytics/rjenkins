@@ -15,7 +15,7 @@ step(name, ...)
 \code{character()}
 }
 \description{
-DSL helper function
+Step
 }
 \examples{
 \dontrun{

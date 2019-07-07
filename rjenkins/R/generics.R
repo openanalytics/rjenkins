@@ -1,5 +1,6 @@
 
-#' Load resource into an HTML Browser
+#' Load a given resource into an HTML browser.
+#' @description Load a resource into an HTML browser.
 #' @rdname browse
 #' @description S3 generic wrapper replacement of \code{\link[utils]{browseURL}}
 #' @param x resource to browse
@@ -21,7 +22,7 @@ browse.character <- function(x, ...) browseURL(x, ...)
 #' @description S3 generic
 #' @param x object to list jobs for
 #' @export
-listJobs <- function(x) {
+listJobs <- function(x, ...) {
   
   UseMethod("listJobs")
   
@@ -30,15 +31,9 @@ listJobs <- function(x) {
 #' Find a job
 #' @rdname getJob
 #' @description S3 generic
-#' @param x job parent
-#' @param name job name
-#' @return object of class \code{jenkinsJob}
+#' @param x object to get job for
 #' @export
-getJob <- function(x, name) {
-  
-  if (!hasJob(x, name)) {
-    stop("Job with given name does not exist on the jenkins server.")
-  }
+getJob <- function(x, ...) {
   
   UseMethod("getJob")
   
@@ -48,10 +43,9 @@ getJob <- function(x, name) {
 #' @rdname hasJob
 #' @description S3 generic
 #' @param x object to check jobs for
-#' @param name job name
 #' @return \code{logical}
 #' @export
-hasJob <- function(x, name) {
+hasJob <- function(x, ...) {
   
   UseMethod("hasJob")
   

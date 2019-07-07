@@ -103,7 +103,7 @@ extractPackageArchives <- function(artifacts, latestOnly = TRUE,
 
 #' Install Packages from Jenkins
 #' @description Install build artifacts exported from a jenkins job as R packages.
-#' @template jenkinsJobOp
+#' @template JenkinsJobOp
 #' @param artifacts \code{character()} vector or artifact name(s) that should be
 #' installed as an R package. By default this is the complete list of artifacts
 #' exported from the latest succesful build of the corresponding job.

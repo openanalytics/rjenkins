@@ -119,3 +119,44 @@ test_that("complex pipeline", {
       expect_identical(x, testdata$complex_pipeline)
       
     })
+
+testdata$r_pipeline <- "pipeline {
+    agent any
+    stages {
+        stage('Roxygen') {
+            steps {
+                sh 'R  -e \\'roxygen2::roxygenize(\"myPackage\")\\''
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'R  -e \\'devtools::build(\"myPackage\")\\''
+            }
+        }
+    }
+}
+"
+
+test_that("pipeline with inline R", {
+      
+      x <- jenkinsPipeline(
+          pipeline(
+              agent("any"),
+              stages(
+                  stage("Roxygen",
+                      steps(
+                          R(roxygen2::roxygenize('myPackage'))
+                      )
+                  ),
+                  stage("Build",
+                      steps(
+                          R(devtools::build('myPackage'))
+                      )
+                  )
+              )
+          )
+      )
+      
+      expect_identical(x, testdata$r_pipeline)
+      
+    })

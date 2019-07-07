@@ -19,5 +19,5 @@ variadicOp(n, left, sep, right)
 closure
 }
 \description{
-DSL helper function
+Variadic operator
 }

@@ -15,5 +15,5 @@ indentLines(text, indent = "    ")
 \code{character()}
 }
 \description{
-DSL helper function
+Indent lines
 }

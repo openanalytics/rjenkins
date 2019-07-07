@@ -15,5 +15,5 @@ naryOp(n, parts)
 closure
 }
 \description{
-DSL helper function
+N-ary operator
 }
