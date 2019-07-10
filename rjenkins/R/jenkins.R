@@ -190,7 +190,7 @@ jenkinsHEAD <- function(
   
   url <- modify_url(
       jenkins$host,
-      path = c(conn$contextPath, curl_escape(path), "api", "xml"))
+      path = c(jenkins$contextPath, curl_escape(path), "api", "xml"))
   
   response <- HEAD(url, authenticate(jenkins$user, jenkins$token))
   
@@ -217,7 +217,7 @@ jenkinsPOST <- function(
   
   url <-  modify_url(
       jenkins$host,
-      path = c(conn$contextPath, curl_escape(path)))
+      path = c(jenkins$contextPath, curl_escape(path)))
   
   response <- POST(url,
       body = xml,
@@ -255,7 +255,7 @@ jenkinsGET <- function(
   
   url <- modify_url(
       jenkins$host,
-      path = c(conn$contextPath, curl_escape(path), "api", "xml"),
+      path = c(jenkins$contextPath, curl_escape(path), "api", "xml"),
       query = c(
           if (!is.null(xpath)) list(xpath = xpath, wrapper = wrapper),
           if (!is.null(tree)) list(tree = tree),

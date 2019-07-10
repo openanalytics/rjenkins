@@ -17,7 +17,7 @@ tag <- function(name, ...) {
 #' @param remote the git remote repository to check out
 #' @param credentialsId credentials used to scan branches and check out sources
 #' @details If an inline \code{pipeline} is supplied, the \code{remote}
-#' argument will be ignored/
+#' argument will be ignored
 #' @return XML document
 #' @seealso \link{createMultiBranchPipeline} \link{createJob}
 #' @importFrom xml2 xml_child xml_text read_xml xml_text<- as_xml_document
@@ -103,19 +103,20 @@ gitBranchSource <- function(remote, credentialsId) {
   
 }
 #' @rdname createMultiBranchPipeline
-#' @param api GitHub api URI
 #' @param repository GitHub repository name
 #' @param owner GitHub repository owner
 #' @param sshCheckoutCredentialsId (optional) if not \code{NULL}, the id of the
 #' ssh credentials to use for the git checkout.
+#' @param api GitHub api URI
 #' @importFrom openssl md5
+#' @import xml2
 #' @export
 gitHubBranchSource <- function(
-    api,
     owner,
     repository,
     credentialsId,
-    sshCredentialsId = NULL
+    sshCredentialsId = NULL,
+    api = "https://api.github.com"
     ) {
   
   config <- read_xml(

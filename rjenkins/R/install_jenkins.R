@@ -135,10 +135,12 @@ installPackageArtifacts <- function(
   for (archive in extractPackageArchives(artifacts, latestOnly = latestOnly)$archive) {
     
     url <- modify_url(job$conn$host,
-        path = c("job", job$name, build, "artifact", archive))
+        path = c(job$conn$contextPath, job$path, build, "artifact", archive))
     
     response <- GET(url, write_disk(file.path(tmpDir, archive), overwrite = TRUE),
         authenticate(job$conn$user, job$conn$token))
+    
+    message(url)
     
     install.packages(pkgs = file.path(tmpDir, archive), repos = NULL, type = "source")
     

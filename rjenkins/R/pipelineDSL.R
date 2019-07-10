@@ -165,6 +165,11 @@ jenkinsPipeline <- function(pipelineExpr = pipeline()) {
   others <- list(
       pipeline = blockOp("pipeline"),
       always = blockOp("always"),
+      changed = blockOp("changed"),
+      fixed = blockOp("fixed"),
+      regression = blockOp("regression"),
+      success = blockOp("success"),
+      aborted = blockOp("aborted"),
       step = step
   )
   
@@ -187,9 +192,13 @@ pipeline <- function(...) eval(substitute(jenkinsPipeline(pipeline(...))))
 #' @export
 pipelineSteps <- list(
     echo = stepOp("echo"),
-    sh = stepOp("sh"),
+    sh = function(lines, multiLine = FALSE) {
+      if (!multiLine) step("sh", lines)
+      else sprintf("sh '''\n%s\n'''", lines)
+    },
     R = function(sexpr, options = "") {
-      step("sh", sprintf("R %s -e \\'%s\\'", options, deparse(substitute(sexpr))))
+      lines <- paste(collapse = "\n", deparse(substitute(sexpr)))
+      pipelineSteps$sh(sprintf("R %s -e \\'%s\\'", options, lines))
     }
 )
 
@@ -251,6 +260,12 @@ pipelineDirectives <- list(
                   if (!is.null(fileName)) step("filename", fileName),
                   if (!is.null(reuseNode)) step("reuseNode", reuseNode)
               )))
+    },
+    
+    withDockerRegistry = function(..., url = NULL, credentialsId = NULL) {
+      registry <- c(url = url, credentialsId = credentialsId)
+      blockOp(sprintf("withDockerRegistry([%s])",
+              paste(collapse = ", ", sprintf('%s: "%s"', names(registry), registry))))(...)
     },
     
     agent = function(...) {

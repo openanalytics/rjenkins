@@ -5,7 +5,7 @@
 \title{Connect to a Jenkins Server}
 \usage{
 jenkins(url = "http://localhost", user = NULL, token = NULL,
-  auth = NULL)
+  auth = NULL, contextPath = c())
 }
 \arguments{
 \item{url}{jenkins endpoint}

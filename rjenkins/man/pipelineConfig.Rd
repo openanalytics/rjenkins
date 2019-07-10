@@ -21,7 +21,7 @@ Creates configuration for a pipeline job.
 }
 \details{
 If an inline \code{pipeline} is supplied, the \code{remote}
-argument will be ignored/
+argument will be ignored
 }
 \seealso{
 \link{createMultiBranchPipeline} \link{createJob}

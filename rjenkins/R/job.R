@@ -103,7 +103,7 @@ getJobInfo <- function(job) {
       tree = "description,displayName")
   
   result <- unlist(recursive = FALSE, as_list(xml)[[1]])
-  result$itemType <- xml_name(res)
+  result$itemType <- xml_name(xml)
   
   result
   
