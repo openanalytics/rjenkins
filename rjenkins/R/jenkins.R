@@ -10,7 +10,7 @@
 #' @return object of class \code{Jenkins}
 #' @export
 jenkins <- function(url = "http://localhost", user = NULL,
-    token = NULL, auth = NULL) {
+    token = NULL, auth = NULL, contextPath = c()) {
   
   if (!any(parse_url(url)$scheme == c("https", "http"))) {
     warning("Unsupported scheme")
@@ -25,6 +25,7 @@ jenkins <- function(url = "http://localhost", user = NULL,
   
   structure(
       list(host = url,
+          contextPath = contextPath,
           user = user,
           token = token),
       class = c("Jenkins", "list"))
@@ -77,7 +78,7 @@ crumbHeader <- function(crumb) {
 crumbRequest <- function(conn) {
   
   url <- modify_url(conn$host,
-      path = c("crumbIssuer", "api", "xml"),
+      path = c(conn$contextPath, "crumbIssuer", "api", "xml"),
       query = list(xpath='concat(//crumbRequestField,":",//crumb)'))
   
   response <- GET(url, authenticate(conn$user, conn$token))
@@ -101,7 +102,7 @@ getBuildQueue <- function(conn) {
   # TODO: trim unneeded info with xpath
   
   url <- modify_url(conn$host,
-      path = c("queue", "api", "xml"))
+      path = c(conn$contextPath, "queue", "api", "xml"))
   
   response <- GET(url, authenticate(conn$user, conn$token))
   
@@ -150,7 +151,7 @@ getJob.Jenkins <- function(x, name, ...) {
 #' @export
 browse.Jenkins <- function(x, ...) {
   
-  browseURL(modify_url(x$host), ...)
+  browseURL(modify_url(x$host, path = x$contextPath), ...)
   
 }
 
@@ -189,7 +190,7 @@ jenkinsHEAD <- function(
   
   url <- modify_url(
       jenkins$host,
-      path = c(curl_escape(path), "api", "xml"))
+      path = c(conn$contextPath, curl_escape(path), "api", "xml"))
   
   response <- HEAD(url, authenticate(jenkins$user, jenkins$token))
   
@@ -216,7 +217,7 @@ jenkinsPOST <- function(
   
   url <-  modify_url(
       jenkins$host,
-      path = c(curl_escape(path)))
+      path = c(conn$contextPath, curl_escape(path)))
   
   response <- POST(url,
       body = xml,
@@ -254,7 +255,7 @@ jenkinsGET <- function(
   
   url <- modify_url(
       jenkins$host,
-      path = c(curl_escape(path), "api", "xml"),
+      path = c(conn$contextPath, curl_escape(path), "api", "xml"),
       query = c(
           if (!is.null(xpath)) list(xpath = xpath, wrapper = wrapper),
           if (!is.null(tree)) list(tree = tree),
@@ -335,7 +336,7 @@ createJob <- function(jenkins, name, config) {
   }
   
   url <- modify_url(jenkins$host,
-      path = "createItem",
+      path = c(jenkins$contextPath, "createItem"),
       query = list(name = name))
   
   response <- POST(url, authenticate(jenkins$user, jenkins$token),

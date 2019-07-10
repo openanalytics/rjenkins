@@ -33,7 +33,7 @@ JENKINS_BUILD_REFS <- c("lastBuild", "lastCompletedBuild", "lastFailedBuild",
 #' @export
 browse.JenkinsJob <- function(x, ...) {
   
-  browseURL(modify_url(x$conn$host, path = x$path), ...)
+  browseURL(modify_url(x$conn$host, path = c(x$conn$contextPath, x$path)), ...)
   
 }
 
@@ -45,7 +45,7 @@ browse.JenkinsJob <- function(x, ...) {
 print.JenkinsJob <- function(x, ...) {
   
   cat(sprintf("<jenkins job with url: %s>\n",
-          modify_url(x$conn$host, path = x$path)))
+          modify_url(x$conn$host, path = c(x$conn$contextPath, x$path))))
   
 }
 
@@ -121,7 +121,7 @@ getBuildHistory <- function(job, depth = 3) {
     stop("depth must be strictly positive")
   
   url <- modify_url(job$conn$host,
-      path = c(job$path, "api", "xml"),
+      path = c(job$conn$contextPath, job$path, "api", "xml"),
       query = list(
           xpath = "/*/build",
           wrapper = "builds",
@@ -172,7 +172,7 @@ listArtifacts <- function(job, build = JENKINS_BUILD_REFS) {
   }
   
   url <- modify_url(job$conn$host,
-      path = c(job$path, build, "api", "xml"),
+      path = c(job$conn$contextPath, job$path, build, "api", "xml"),
       query = list(xpath = "/*/artifact/relativePath", wrapper = "artifacts"))
   
   response <- GET(url, authenticate(job$conn$user, job$conn$token))
@@ -189,13 +189,7 @@ listArtifacts <- function(job, build = JENKINS_BUILD_REFS) {
 #' @export
 deleteJob <- function(job) {
   
-  url <- modify_url(job$conn$host, path = c(job$path, "doDelete"))
-  
-  response <- POST(url,
-      authenticate(job$conn$user, job$conn$token),
-      crumbHeader(crumbRequest(job$conn)))
-  
-  invisible()
+  invisible(jenkinsPOST(job$conn, job$path, "doDelete", xml = NULL))
   
 }
 
@@ -211,12 +205,12 @@ scheduleBuild <- function(job, params = NULL) {
     if (!is.list(params) || length(names(params)) != length(params))
       stop("build parameters should be given as a named list")
     
-    url <- modify_url(job$conn$host, path = c(job$path, "buildWithParameters"))
+    url <- modify_url(job$conn$host, path = c(job$conn$contextPath, job$path, "buildWithParameters"))
     body <- params
     
   } else {
     
-    url <- modify_url(job$conn$host, path = c(job$path, "build"))
+    url <- modify_url(job$conn$host, path = c(job$conn$contextPath, job$path, "build"))
     body <- NULL
     
   }
@@ -230,7 +224,7 @@ scheduleBuild <- function(job, params = NULL) {
   
   if (status_code(response) == 400 && is.null(params)) {
     
-    parametersQueryReponse <- GET(modify_url(job$conn$host, path = c(job$path, "api", "xml")),
+    parametersQueryReponse <- GET(modify_url(job$conn$host, path = c(job$conn$contextPath, job$path, "api", "xml")),
         authenticate(job$conn$user, job$conn$token),
         query = list(
             xpath = "/*/property[@_class='hudson.model.ParametersDefinitionProperty']",
@@ -274,7 +268,6 @@ schedulePoll <- function(job) {
 #' @template JenkinsJobOp
 #' @param build build number or a build ref. See \code{\link{JENKINS_BUILD_REFS}}
 #' @param start byte offset
-#' @importFrom httr modify_url GET authenticate content stop_for_status
 #' @export
 getBuildLog <- function(job, build = JENKINS_BUILD_REFS, start = 0) {
   
