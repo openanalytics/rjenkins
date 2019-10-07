@@ -206,6 +206,7 @@ pipelineSteps <- list(
 #' @export
 pipelineSections <- list(
     stages = blockOp("stages"),
+    parallel = blockOp("parallel"),
     steps = blockOp("steps"),
     post = blockOp("post")
 )
