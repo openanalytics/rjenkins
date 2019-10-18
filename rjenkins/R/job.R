@@ -189,7 +189,7 @@ listArtifacts <- function(job, build = JENKINS_BUILD_REFS) {
 #' @export
 deleteJob <- function(job) {
   
-  invisible(jenkinsPOST(job$conn, job$path, "doDelete", xml = NULL))
+  invisible(jenkinsPOST(job$conn, c(job$path, "doDelete"), xml = NULL))
   
 }
 
