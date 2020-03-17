@@ -15,7 +15,12 @@ pipeline {
     }
     
     environment {
-        RDEPOT_CREDENTIALS = credentials('eae5688d-c858-4757-a17f-65b68ca771da')
+        RDEPOT_HOST = "https://rdepot.openanalytics.eu/api/manager/packages"
+        RDEPOT_REPO = "local"
+    }
+    
+    libraries {
+        lib("rdepot")
     }
     
     stages {
@@ -38,37 +43,16 @@ pipeline {
         }
     }
     post {
-    
-    
         always {
             archiveArtifacts artifacts: '*.tar.gz, *.pdf', fingerprint: true
         }
         success {
-            sh '''#!/bin/bash
-set +x
-
-TOKEN=$(printf "$RDEPOT_CREDENTIALS" | base64 -w 0)
-
-curl -X POST \
-  "https://rdepot-test.openanalytics.eu/api/manager/packages" \
-  -H 'Accept: application/json' \
-  -H "Authorization: Basic $TOKEN" \
-  -H 'Content-Type: multipart/form-data' \
-  -F 'uploadRequests[0].fileData=@'"$(ls -1 *.tar.gz | head -1 | tr -d '\n')"';type=application/gzip' \
-  -F 'uploadRequests[0].repository=OA local' \
-  -F 'uploadRequests[0].changes='"$SCM_CHANGELOG" \
-  -F 'uploadRequests[0].replace=true'
-  
-set -x
-            '''
+            rdepotSubmit "${env.RDEPOT_HOST}", "${env.RDEPOT_REPO}", "${env.SCM_CHANGELOG}", 'jenkins-oa'
             rocketSend channel: "${params.NOTIFY_CHANNEL}", message: "Build Successful - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
-        
         }
         failure {
             rocketSend channel: "${params.NOTIFY_CHANNEL}", message: "Build Failed - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
         }
-
-
     }
     
 }
