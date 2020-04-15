@@ -3,7 +3,6 @@
 \docType{package}
 \name{rjenkins}
 \alias{rjenkins}
-\alias{rjenkins-package}
 \title{Jenkins API client for R}
 \description{
 \code{rjenkins} provides an R wrapper around the jenkins API.

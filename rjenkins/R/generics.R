@@ -33,7 +33,9 @@ listJobs <- function(x, ...) {
 #' @description S3 generic
 #' @param x object to get job for
 #' @export
-getJob <- function(x, ...) {
+getJob <- function(x, name, ...) {
+  
+  stopifnot(hasJob(x, name))
   
   UseMethod("getJob")
   

@@ -4,8 +4,16 @@
 \alias{jenkinsGET}
 \title{Execute a GET API request for Jenkins}
 \usage{
-jenkinsGET(jenkins, path = c(), tree = NULL, xpath = NULL,
-  wrapper = "items", returnContent = TRUE, query = NULL, ...)
+jenkinsGET(
+  jenkins,
+  path = c(),
+  tree = NULL,
+  xpath = NULL,
+  wrapper = "items",
+  returnContent = TRUE,
+  query = NULL,
+  ...
+)
 }
 \arguments{
 \item{jenkins}{See \code{\link{jenkins}}}

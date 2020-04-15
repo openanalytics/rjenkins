@@ -10,5 +10,5 @@ License: GPL-3
 Imports: httr, xml2, utils, stats, methods, openssl, curl
 Enhances: remotes
 Suggests: knitr, keyringr, testthat
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
 VignetteBuilder: knitr

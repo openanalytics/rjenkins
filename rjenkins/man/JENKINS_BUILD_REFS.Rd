@@ -4,7 +4,9 @@
 \name{JENKINS_BUILD_REFS}
 \alias{JENKINS_BUILD_REFS}
 \title{Possible Jenkins Build Refs}
-\format{An object of class \code{character} of length 6.}
+\format{
+An object of class \code{character} of length 6.
+}
 \usage{
 JENKINS_BUILD_REFS
 }

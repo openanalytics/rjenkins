@@ -4,7 +4,9 @@
 \name{pipelineDirectives}
 \alias{pipelineDirectives}
 \title{Pipeline directives}
-\format{An object of class \code{list} of length 7.}
+\format{
+An object of class \code{list} of length 7.
+}
 \usage{
 pipelineDirectives
 }

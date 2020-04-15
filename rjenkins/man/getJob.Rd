@@ -7,20 +7,20 @@
 \alias{getJob.JenkinsView}
 \title{Find a job}
 \usage{
-getJob(x, ...)
+getJob(x, name, ...)
 
 \method{getJob}{Jenkins}(x, name, ...)
 
-\method{getJob}{JenkinsJob}(x, name)
+\method{getJob}{JenkinsJob}(x, name, ...)
 
 \method{getJob}{JenkinsView}(x, name)
 }
 \arguments{
 \item{x}{object to get job for}
 
-\item{...}{zero or more child job names}
-
 \item{name}{job name}
+
+\item{...}{zero or more child job names}
 }
 \description{
 S3 generic

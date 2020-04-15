@@ -295,17 +295,24 @@ listJobs.JenkinsJob <- function(x) {
 }
 
 #' @rdname getJob
+#' @param ... zero or more child job names
 #' @export
-getJob.JenkinsJob <- function(x, name) {
+getJob.JenkinsJob <- function(x, name, ...) {
   
-  stopifnot(hasJob(x, name))
-  
-  JenkinsJob(
+  job <- JenkinsJob(
       conn = x$conn,
       name = name,
       path = c(x$path, "job", name),
       parent = x)
   
+  getJobRecursive(job, ...)
+  
+}
+
+getJobRecursive <- function(job, ...) {
+  hierarchy <- list(...)
+  if (length(hierarchy) == 0) job
+  else do.call(getJob, c(list(job, name = hierarchy[[1]]), hierarchy[-1]))
 }
 
 #' @rdname hasJob

@@ -132,18 +132,15 @@ getBuildQueue <- function(conn) {
 
 #' @rdname getJob
 #' @param name job name
-#' @param ... zero or more child job names
 #' @export
 getJob.Jenkins <- function(x, name, ...) {
   
-  stopifnot(hasJob(x, name[1]))
+  job <- JenkinsJob(
+      x,
+      name[1],
+      path = c("job", name[1]))
   
-  job <- JenkinsJob(x, name[1], path = c("job", name[1]))
-  
-  hierarchy <- list(...)
-  
-  if (length(hierarchy) == 0) job
-  else do.call(getJob, c(list(job, name = hierarchy[[1]]), hierarchy[-1]))
+  getJobRecursive(job, ...)
   
 }
 

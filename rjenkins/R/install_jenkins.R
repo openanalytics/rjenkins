@@ -17,11 +17,11 @@
 install_jenkins <- function(uri, auth = jenkinsAuthEnv()) {
   
   # parse uri
-  pattern <- "^(.*)/(.*)/([a-zA-Z0-9.]{2,})(#(.)+)?$"
+  pattern <- "^(https?://[A-Za-z0-9\\.\\-]*)/(.*)/([a-zA-Z0-9\\.]{2,})(#(.)+)?$"
   parts <- list(
       host = gsub(pattern, "\\1", uri),
       jobName = gsub(pattern, "\\2", uri),
-      pkgName = gsub(pattern, "\\2", uri),
+      pkgName = gsub(pattern, "\\3", uri),
       build = gsub(pattern, "\\5", uri))
   
   # determine build ref
@@ -35,7 +35,7 @@ install_jenkins <- function(uri, auth = jenkinsAuthEnv()) {
   }
   
   # match proper credentials with uri host
-  if (is.list(auth)) {
+  if (is.list(auth) && !is(auth, "jenkinsCredentials")) {
     if (!any(names(auth) == parts$host)) {
       stop("cannot find matching credentials")
     }
@@ -44,14 +44,16 @@ install_jenkins <- function(uri, auth = jenkinsAuthEnv()) {
   }
   
   # find and install package
-  conn <- jenkinsConnection(parts$host, auth = auth)
+  conn <- jenkins(parts$host, auth = auth)
   
-  job <- getJob(conn, parts$jobName)
+  jobPath <- strsplit(parts$jobName, "/")[[1]]
+  
+  job <- do.call(getJob, c(list(x = conn), as.list(jobPath)))
   
   archives <- extractPackageArchives(listArtifacts(job))
-
+  
   installPackageArtifacts(job = job,
-      artifacts = archives$archive[archives$name == parts$pkgName])
+      artifacts = archives[archives$name == parts$pkgName,])
   
   invisible(parts$pkgName)
 

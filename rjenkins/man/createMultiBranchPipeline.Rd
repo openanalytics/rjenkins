@@ -10,8 +10,13 @@ multibranchPipelineConfig(branchSource)
 
 gitBranchSource(remote, credentialsId)
 
-gitHubBranchSource(owner, repository, credentialsId,
-  sshCredentialsId = NULL, api = "https://api.github.com")
+gitHubBranchSource(
+  owner,
+  repository,
+  credentialsId,
+  sshCredentialsId = NULL,
+  api = "https://api.github.com"
+)
 }
 \arguments{
 \item{credentialsId}{credentials used to scan branches and check out sources}

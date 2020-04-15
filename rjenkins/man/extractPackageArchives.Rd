@@ -4,8 +4,11 @@
 \alias{extractPackageArchives}
 \title{Extract Package Archives Names from Build Artifacts}
 \usage{
-extractPackageArchives(artifacts, latestOnly = TRUE,
-  archivePattern = "^([a-zA-Z0-9.]{2,})_([0-9]+\\\\.[0-9]+[.-][0-9]+)\\\\.tar\\\\.gz$")
+extractPackageArchives(
+  artifacts,
+  latestOnly = TRUE,
+  archivePattern = "^([a-zA-Z0-9.]{2,})_([0-9]+\\\\.[0-9]+[.-][0-9]+)\\\\.tar\\\\.gz$"
+)
 }
 \arguments{
 \item{artifacts}{\code{character()} vector of artifact name(s)}
