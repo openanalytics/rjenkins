@@ -4,7 +4,7 @@
 \alias{indentLines}
 \title{Indent lines}
 \usage{
-indentLines(text, indent = "    ")
+indentLines(text, indent = strrep(" ", getOption("rjenkins.indent", 4)))
 }
 \arguments{
 \item{text}{\code{character()} vector of text snippets ending in a newline}

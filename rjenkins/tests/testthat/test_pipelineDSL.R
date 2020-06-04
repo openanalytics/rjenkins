@@ -1,17 +1,13 @@
 
 context("pipeline DSL")
 
-testdata <- list()
-
-testdata$empty_pipeline <- "pipeline {
-}
-"
+options(rjenkins.indent = 2)
 
 test_that("empty pipeline", {
       
       x <- jenkinsPipeline(pipeline())
       
-      expect_identical(x, testdata$empty_pipeline)
+      expect_identical(x, "pipeline {\n}\n")
       
     })
 
@@ -23,18 +19,6 @@ test_that("step", {
       )
       
     })
-
-testdata$simple_pipeline <- "pipeline {
-    agent any
-    stages {
-        stage('Build') {
-            steps {
-                echo 'hello'
-            }
-        }
-    }
-}
-"
 
 test_that("simple pipeline", {
       
@@ -51,37 +35,11 @@ test_that("simple pipeline", {
           )
       )
       
-      expect_identical(x, testdata$simple_pipeline)
+      expect_identical(
+          trimws(x),
+          trimws(readTestFile("simple.Jenkinsfile")))
       
     })
-
-testdata$complex_pipeline <- "pipeline {
-    agent any
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '3'))
-    }
-    triggers {
-        pollSCM('H/15 * * * *')
-    }
-    stages {
-        stage('Build') {
-            agent {
-                docker {
-                    image 'some/image'
-                }
-            }
-            steps {
-                sh 'script.sh'
-            }
-        }
-    }
-    post {
-        always {
-            archiveArtifacts artifacts: '*.tar.gz, *.pdf', fingerprint: true
-        }
-    }
-}
-"
 
 test_that("complex pipeline", {
       
@@ -116,26 +74,11 @@ test_that("complex pipeline", {
           )
       )
       
-      expect_identical(x, testdata$complex_pipeline)
+      expect_identical(
+          trimws(x),
+          trimws(readTestFile("complex.Jenkinsfile")))
       
     })
-
-testdata$r_pipeline <- "pipeline {
-    agent any
-    stages {
-        stage('Roxygen') {
-            steps {
-                sh 'R  -e \\'roxygen2::roxygenize(\"myPackage\")\\''
-            }
-        }
-        stage('Build') {
-            steps {
-                sh 'R  -e \\'devtools::build(\"myPackage\")\\''
-            }
-        }
-    }
-}
-"
 
 test_that("pipeline with inline R", {
       
@@ -157,6 +100,37 @@ test_that("pipeline with inline R", {
           )
       )
       
-      expect_identical(x, testdata$r_pipeline)
+      expect_identical(
+          trimws(x),
+          trimws(readTestFile("R.Jenkinsfile")))
+      
+    })
+
+test_that("kubernetes pipeline", {
+      
+      expect_identical(
+          trimws(jenkinsPipeline(pipeline(
+              agent(
+                  kubernetes(
+                      yaml = GString(
+                          multiLine = TRUE,
+                          interpolation = TRUE,
+                          readTestFile("kubernetesPod.yaml"))
+                  )
+              ),
+              stages(
+                  stage("Run maven",
+                      steps(
+                          container("maven",
+                              step("sh", "mvn -version")
+                          ),
+                          container("busybox",
+                              step("sh", "/bin/busybox")
+                          )
+                      )
+                  )
+              )
+          ))),
+          trimws(readTestFile("kubernetes.Jenkinsfile")))
       
     })
