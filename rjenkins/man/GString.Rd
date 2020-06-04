@@ -4,7 +4,11 @@
 \alias{GString}
 \title{Groovy String}
 \usage{
-GString(x, multiLine = FALSE, interpolation = FALSE)
+GString(
+  x,
+  multiLine = grepl("\\n", x),
+  interpolation = grepl("\\\\$\\\\{[^\\\\{]*\\\\}", x)
+)
 }
 \arguments{
 \item{x}{\code{character} to use as the string base}

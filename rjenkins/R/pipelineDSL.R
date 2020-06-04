@@ -59,7 +59,7 @@ formatParameter <- function(value) {
   } else if (is(value, "GString")) {
     formatGString(value)
   } else {
-    sprintf("'%s'", value)
+    formatGString(GString(value))
   }
 }
 
