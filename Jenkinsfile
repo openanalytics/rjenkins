@@ -1,59 +1,32 @@
 pipeline {
-
-    agent any
-    
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '3'))
+  agent {
+    kubernetes {
+      yaml '''
+      apiVersion: v1
+      kind: Pod
+      spec:
+        containers:
+          image: 196229073436.dkr.ecr.eu-west-1.amazonaws.com/oa-infrastructure
+      '''
     }
-
-    triggers {
-        pollSCM('H/15 * * * *')
+  }
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '3'))
+  }
+  triggers {
+    pollSCM('H/15 * * * *')
+  }
+  stages {
+    stage('build') {
+      steps {
+        sh 'R CMD build rjenkins'
+      }
     }
-    
-    parameters {
-        string(name: 'NOTIFY_CHANNEL', defaultValue: '@dseynaeve', description: 'Rocket.Chat channel to notify')
+  }
+  post {
+    always {
+      archiveArtifacts artifacts: '*.tar.gz, *.pdf', fingerprint: true
     }
-    
-    environment {
-        RDEPOT_HOST = "https://rdepot.openanalytics.eu/api/manager/packages"
-        RDEPOT_REPO = "local"
-    }
-    
-    libraries {
-        lib("rdepot")
-    }
-    
-    stages {
-        stage('Notify') {
-            steps {
-                rocketSend channel: "${params.NOTIFY_CHANNEL}", message: "Build Started - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
-            }
-        }
-        stage('Build') {
-            agent {
-                docker {
-                    image 'registry.openanalytics.eu/private/packamon'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh 'pwd'
-                sh '/usr/local/bin/packamon.sh'
-            }
-        }
-    }
-    post {
-        always {
-            archiveArtifacts artifacts: '*.tar.gz, *.pdf', fingerprint: true
-        }
-        success {
-            rdepotSubmit "${env.RDEPOT_HOST}", "${env.RDEPOT_REPO}", "${env.SCM_CHANGELOG}", 'jenkins-oa'
-            rocketSend channel: "${params.NOTIFY_CHANNEL}", message: "Build Successful - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
-        }
-        failure {
-            rocketSend channel: "${params.NOTIFY_CHANNEL}", message: "Build Failed - ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)", rawMessage: true
-        }
-    }
-    
+  }
 }
 
