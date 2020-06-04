@@ -6,8 +6,13 @@ pipeline {
       kind: Pod
       spec:
         containers:
-          image: 196229073436.dkr.ecr.eu-west-1.amazonaws.com/oa-infrastructure
+        - name: r
+          command:
+          - cat
+          tty: yes
+          image: 196229073436.dkr.ecr.eu-west-1.amazonaws.com/openanalytics/r-base:latest
       '''
+      defaultContainer 'r'
     }
   }
   options {
@@ -19,13 +24,9 @@ pipeline {
   stages {
     stage('build') {
       steps {
-        sh 'R CMD build rjenkins'
+        sh 'R CMD build rjenkins --no-build-vignettes'
+        archiveArtifacts artifacts: '*.tar.gz, *.pdf', fingerprint: true
       }
-    }
-  }
-  post {
-    always {
-      archiveArtifacts artifacts: '*.tar.gz, *.pdf', fingerprint: true
     }
   }
 }

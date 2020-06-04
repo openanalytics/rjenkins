@@ -3,14 +3,18 @@ writeLines(
     text = rjenkins::pipeline(
         agent(
             kubernetes(
+                defaultContainer = "r",
                 yaml = paste0("\n", yaml::as.yaml(
                     list(
                         apiVersion = "v1",
                         kind = "Pod",
                         spec = list(
-                            containers = c(
+                            containers = list(
                                 list(
-                                    image = "196229073436.dkr.ecr.eu-west-1.amazonaws.com/oa-infrastructure"))))))
+                                    name = "r",
+                                    command = list("cat"),
+                                    tty = TRUE,
+                                    image = "196229073436.dkr.ecr.eu-west-1.amazonaws.com/openanalytics/r-base:latest"))))))
             )
         ),
         options(
@@ -22,15 +26,11 @@ writeLines(
         stages(
             stage("build",
                 steps(
-                    sh("R CMD build rjenkins")
+                    sh("R CMD build rjenkins --no-build-vignettes"),
+                    step("archiveArtifacts",
+                        artifacts = "*.tar.gz, *.pdf",
+                        fingerprint = TRUE)
                 )
-            )
-        ),
-        post(
-            always(
-                step("archiveArtifacts",
-                    artifacts = "*.tar.gz, *.pdf",
-                    fingerprint = TRUE)
             )
         )
     )
