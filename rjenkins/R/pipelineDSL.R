@@ -56,6 +56,8 @@ formatParameter <- function(value) {
     if (value) "true" else "false"
   } else if (is.numeric(value)) {
     sprintf("%s", value)
+  } else if (is(value, "GString")) {
+    formatGString(value)
   } else {
     sprintf("'%s'", value)
   }
@@ -65,7 +67,9 @@ formatParameter <- function(value) {
 #' @param text \code{character()} vector of text snippets ending in a newline
 #' @param indent \code{character()} string to indent with
 #' @return \code{character()}
-indentLines <- function(text, indent = "    ") {
+indentLines <- function(
+    text,
+    indent = strrep(" ", getOption("rjenkins.indent", 4))) {
   
   if (length(i <- which(!grepl("\n$", text))) > 0)
     stop("snippet does not end in newline: ", text[i])
@@ -261,6 +265,18 @@ pipelineDirectives <- list(
                   if (!is.null(fileName)) step("filename", fileName),
                   if (!is.null(reuseNode)) step("reuseNode", reuseNode)
               )))
+    },
+    
+    kubernetes = function(yaml = NULL, defaultContainer = NULL) {
+      do.call(blockOp("kubernetes"),
+          Filter(Negate(is.null), list(
+                  if (!is.null(yaml)) step("yaml", yaml),
+                  if (!is.null(defaultContainer)) step("defaultContainer", defaultContainer)
+              )))
+    },
+    
+    container = function(containerName, ...) {
+      blockOp(sprintf("container(%s)", formatParameter(containerName)))(...)
     },
     
     withDockerRegistry = function(..., url = NULL, credentialsId = NULL) {

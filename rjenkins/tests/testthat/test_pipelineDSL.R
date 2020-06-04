@@ -38,6 +38,8 @@ testdata$simple_pipeline <- "pipeline {
 
 test_that("simple pipeline", {
       
+      options(rjenkins.indent = 4)
+      
       x <- jenkinsPipeline(
           pipeline(
               agent("any"),
@@ -84,6 +86,8 @@ testdata$complex_pipeline <- "pipeline {
 "
 
 test_that("complex pipeline", {
+      
+      options(rjenkins.indent = 4)
       
       x <- jenkinsPipeline(
           pipeline(
@@ -158,5 +162,38 @@ test_that("pipeline with inline R", {
       )
       
       expect_identical(x, testdata$r_pipeline)
+      
+    })
+
+
+
+test_that("kubernetes pipeline", {
+      
+      options(rjenkins.indent = 2)
+      
+      expect_identical(
+          trimws(jenkinsPipeline(pipeline(
+              agent(
+                  kubernetes(
+                      yaml = GString(
+                          multiLine = TRUE,
+                          interpolation = TRUE,
+                          readTestFile("kubernetesPod.yaml"))
+                  )
+              ),
+              stages(
+                  stage("Run maven",
+                      steps(
+                          container("maven",
+                              step("sh", "mvn -version")
+                          ),
+                          container("busybox",
+                              step("sh", "/bin/busybox")
+                          )
+                      )
+                  )
+              )
+          ))),
+          trimws(readTestFile("kubernetes.Jenkinsfile")))
       
     })
