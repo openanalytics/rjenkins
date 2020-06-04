@@ -5,7 +5,10 @@
 #' @param interpolation allow groovy string interpolation
 #' @seealso \url{https://groovy-lang.org/syntax.html#all-strings}
 #' @export
-GString <- function(x, multiLine = FALSE, interpolation = FALSE) {
+GString <- function(
+    x,
+    multiLine = grepl("\n", x),
+    interpolation = grepl("\\$\\{[^\\{]*\\}", x)) {
   
   structure(
       x,

@@ -113,7 +113,6 @@ test_that("kubernetes pipeline", {
               agent(
                   kubernetes(
                       yaml = GString(
-                          multiLine = TRUE,
                           interpolation = TRUE,
                           readTestFile("kubernetesPod.yaml"))
                   )
