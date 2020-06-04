@@ -20,3 +20,10 @@ test_that("groovy string formatting", {
           "\"\"\"groovy\"\"\"")
       
     })
+
+
+test_that("read test file", {
+      
+      expect_equal(nchar(readTestFile("simple.Jenkinsfile")), 109)
+      
+    })
