@@ -56,6 +56,8 @@ formatParameter <- function(value) {
     if (value) "true" else "false"
   } else if (is.numeric(value)) {
     sprintf("%s", value)
+  } else if (is(value, "AsIs")) {
+    value
   } else if (is(value, "GString")) {
     formatGString(value)
   } else {

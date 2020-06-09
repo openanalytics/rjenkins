@@ -27,6 +27,11 @@ test_that("environment", {
           "environment {\n  A = 1\n  B = 'x'\n  C = \"${env.TEST}\"\n}\n"
       )
       
+      expect_identical(
+          jenkinsPipeline(environment(A = I('x'))),
+          "environment {\n  A = x\n}\n"
+      )
+      
     })
 
 test_that("simple pipeline", {
