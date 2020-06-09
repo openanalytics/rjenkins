@@ -20,6 +20,15 @@ test_that("step", {
       
     })
 
+test_that("environment", {
+      
+      expect_identical(
+          jenkinsPipeline(environment(A = 1, B = "x", C = "${env.TEST}")),
+          "environment {\n  A = 1\n  B = 'x'\n  C = \"${env.TEST}\"\n}\n"
+      )
+      
+    })
+
 test_that("simple pipeline", {
       
       x <- jenkinsPipeline(

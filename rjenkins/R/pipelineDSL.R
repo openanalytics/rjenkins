@@ -219,6 +219,15 @@ pipelineSections <- list(
 #' @export
 pipelineDirectives <- list(
     
+    environment = function(...) {
+      do.call(
+          blockOp("environment"),
+          Map(
+              function(name, value) sprintf("%s = %s", name, formatParameter(value)),
+              name = names(c(...)),
+              value = list(...)))
+    },
+    
     triggers = function(...) {
       triggers <- list(
           cron = function(x) naryOp(1, c("cron(", ")"))(formatParameter(x)),
