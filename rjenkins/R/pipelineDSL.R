@@ -221,6 +221,18 @@ pipelineSections <- list(
 #' @export
 pipelineDirectives <- list(
     
+    when = function(...) {
+      conditions <- list(
+          branch = stepOp("branch"),
+          anyOf = blockOp("anyOf")
+      )
+      do.call(
+          blockOp("when"),
+          eval(substitute(list(...)),
+              list2env(conditions, parent = parent.frame()))
+      )
+    },
+    
     environment = function(...) {
       do.call(
           blockOp("environment"),

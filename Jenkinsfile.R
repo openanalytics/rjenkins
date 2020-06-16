@@ -1,3 +1,4 @@
+packagePath <- "rjenkins"
 writeLines(
     con = "Jenkinsfile",
     text = rjenkins::pipeline(
@@ -14,7 +15,12 @@ writeLines(
                                     name = "r",
                                     command = list("cat"),
                                     tty = TRUE,
-                                    image = "196229073436.dkr.ecr.eu-west-1.amazonaws.com/openanalytics/r-base:latest"))))))
+                                    image = "196229073436.dkr.ecr.eu-west-1.amazonaws.com/openanalytics/r-base:latest"),
+                                list(
+                                    name = "curl",
+                                    command = list("cat"),
+                                    tty = TRUE,
+                                    image = "byrnedo/alpine-curl"))))))
             )
         ),
         options(
@@ -26,11 +32,18 @@ writeLines(
         stages(
             stage("build",
                 steps(
-                    sh("R CMD build rjenkins --no-build-vignettes"),
-                    step("archiveArtifacts",
-                        artifacts = "*.tar.gz, *.pdf",
-                        fingerprint = TRUE)
+                    container("r",
+                        sh(sprintf("R CMD build %s --no-build-vignettes", packagePath)),
+                        step("archiveArtifacts",
+                            artifacts = "*.tar.gz, *.pdf",
+                            fingerprint = TRUE))
                 )
+            ),
+            stage("RDepot",
+                when(anyOf(branch("master"), branch("develop"))),
+                steps(
+                    container("curl",
+                        step("rDepotSubmit", "https://rdepot-dev.openanalytics.eu", "public", "${env.SCM_CHANGELOG}", 'oa-jenkins')))
             )
         )
     )
