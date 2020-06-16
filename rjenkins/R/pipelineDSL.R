@@ -224,6 +224,17 @@ pipelineDirectives <- list(
     when = function(...) {
       conditions <- list(
           branch = stepOp("branch"),
+          buildingTag = stepOp("buildingTag"),
+          changelog = stepOp("changelog"),
+          changeset = stepOp("changeset"),
+          changeRequest = stepOp("changeRequest"),
+          environment = stepOp("environment"),
+          equals = stepOp("equals"),
+          expression = function(x) I(x),
+          tag = stepOp("tag"),
+          triggeredBy = stepOp("triggeredBy"),
+          not = blockOp("not"),
+          allOf = blockOp("allOf"),
           anyOf = blockOp("anyOf")
       )
       do.call(
