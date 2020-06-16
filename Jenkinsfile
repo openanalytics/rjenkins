@@ -44,7 +44,7 @@ pipeline {
             }
             steps {
                 container('curl') {
-                    rDepotSubmit 'https://rdepot-dev.openanalytics.eu', 'public', "${env.SCM_CHANGELOG}", 'oa-jenkins'
+                    rdepotSubmit 'https://rdepot-dev.openanalytics.eu', 'public', "${env.SCM_CHANGELOG}", 'oa-jenkins'
                 }
             }
         }

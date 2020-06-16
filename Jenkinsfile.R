@@ -43,7 +43,7 @@ writeLines(
                 when(anyOf(branch("master"), branch("develop"))),
                 steps(
                     container("curl",
-                        step("rDepotSubmit", "https://rdepot-dev.openanalytics.eu", "public", "${env.SCM_CHANGELOG}", 'oa-jenkins')))
+                        step("rdepotSubmit", "https://rdepot-dev.openanalytics.eu", "public", "${env.SCM_CHANGELOG}", 'oa-jenkins')))
             )
         )
     )
