@@ -1,3 +1,10 @@
+## 0.6.0
+
+* fix: several bugfixes
+* feat(DSL): parallel. environment, when directives
+* feat(DSL): kubernetes plugin support
+* feat(DSL): support I() as an escape hatch to write literal groovy code
+
 ## 0.5.0
 
 * github branchsource support
