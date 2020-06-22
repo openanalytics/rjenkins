@@ -34,7 +34,9 @@ pipelineConfig <- function(
             tag("actions"), 
             tag("description"),
             tag("keepDependencies", "false"),
-            tag("definition", .class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition", plugin="workflow-cps@2.70",
+            tag("definition",
+                .class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition",
+                plugin="workflow-cps@2.70",
                 tag("script", pipeline)))
     )
     
@@ -138,7 +140,8 @@ gitHubBranchSource <- function(
   x <- xml_child(config, "/apiUri")
   xml_text(x) <- api
   
-  sshTraitNode <- xml_child(config, "traits/org.jenkinsci.plugins.github__branch__source.SSHCheckoutTrait")
+  sshTraitNode <- xml_child(config,
+      "traits/org.jenkinsci.plugins.github__branch__source.SSHCheckoutTrait")
   if (!is.null(sshCredentialsId)) {
     xml_text(sshTraitNode) <- sshCredentialsId
   } else {

@@ -282,14 +282,22 @@ pipelineDirectives <- list(
         registryCredentialsId = NULL, alwaysPull = NULL) {
       do.call(blockOp("docker"),
           Filter(Negate(is.null), list(
-                  if (!is.null(image)) step("image", image),
-                  if (!is.null(args)) step("args", args),
-                  if (!is.null(label)) step("label", label),
-                  if (!is.null(reuseNode)) step("reuseNode", reuseNode),
-                  if (!is.null(customWorkspace)) step("customWorkspace", customWorkspace),
-                  if (!is.null(registryCredentialsId)) step("registryCredentialsId", registryCredentialsId),
-                  if (!is.null(registryUrl)) step("registryUrl", registryUrl),
-                  if (!is.null(alwaysPull)) step("alwaysPull", alwaysPull)
+                  if (!is.null(image))
+                    step("image", image),
+                  if (!is.null(args))
+                    step("args", args),
+                  if (!is.null(label))
+                    step("label", label),
+                  if (!is.null(reuseNode))
+                    step("reuseNode", reuseNode),
+                  if (!is.null(customWorkspace))
+                    step("customWorkspace", customWorkspace),
+                  if (!is.null(registryCredentialsId))
+                    step("registryCredentialsId",registryCredentialsId),
+                  if (!is.null(registryUrl))
+                    step("registryUrl", registryUrl),
+                  if (!is.null(alwaysPull))
+                    step("alwaysPull", alwaysPull)
               )))
     },
     
