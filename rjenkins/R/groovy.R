@@ -16,13 +16,11 @@ GroovyClosure <- function(...) {
 #' @return \code{character()}
 #' @export
 formatGroovyClosure <- function(closure) {
-  paste0(
-      "{\n",
-      if (length(closure) > 0)
-        paste(collapse = "",
-            indentLines(
-                endLines(as.vector(closure, "character")))),
-      "}\n")
+  paste(collapse = "",
+      endLines(
+          c("{", indentLines(as.vector(closure, "character")), "}")
+      )
+  )
 }
 
 #' Groovy String

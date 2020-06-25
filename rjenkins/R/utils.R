@@ -11,17 +11,19 @@ readTestFile <- function(fileName) {
 }
 
 #' Indent lines
-#' @param text \code{character()} vector of text snippets ending in a newline
+#' @param text \code{character()} vector of text snippets
 #' @param indent \code{character()} string to indent with
 #' @return \code{character()}
 indentLines <- function(
     text,
     indent = strrep(" ", getOption("rjenkins.indent", 4))) {
   
-  if (length(i <- which(!grepl("\n$", text))) > 0)
-    stop("snippet does not end in newline: ", text[i])
+  # if (length(i <- which(!grepl("\n$", text))) > 0)
+  #   stop("snippet does not end in newline: ", text[i])
   
-  paste0(indent, gsub("\n(.{1})", sprintf("\n%s\\1", indent), text))
+  if (length(text) > 0)
+    paste0(indent, gsub("\n(.{1})", sprintf("\n%s\\1", indent), text))
+  else character()
   
 }
 
@@ -29,5 +31,7 @@ indentLines <- function(
 #' @param texts \code{character()} vector of text snippets
 #' @return \code{character()}
 endLines <- function(texts) {
-  ifelse(!grepl("\n$", texts), paste0(texts, "\n"), texts)
+  if (length(texts) > 0)
+    ifelse(!grepl("\n$", texts), paste0(texts, "\n"), texts)
+  else character()
 }
