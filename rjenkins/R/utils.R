@@ -1,37 +1,4 @@
 
-#' Groovy String
-#' @param x \code{character} to use as the string base
-#' @param multiLine allow string to span multiple lines
-#' @param interpolation allow groovy string interpolation
-#' @seealso \url{https://groovy-lang.org/syntax.html#all-strings}
-#' @export
-GString <- function(
-    x,
-    multiLine = grepl("\n", x),
-    interpolation = grepl("\\$\\{[^\\{]*\\}", x)) {
-  
-  structure(
-      x,
-      multiLine = multiLine,
-      interpolation = interpolation,
-      class = c("GString", class(x))
-  )
-  
-}
-
-#' Format a groovy string
-#' @param gstring the groovy string to format
-#' @export
-formatGString <- function(gstring) {
-  
-  sprintf("%1$s%2$s%1$s",
-      strrep(
-          if (attr(gstring, "interpolation")) "\"" else "'",
-          if (attr(gstring, "multiLine")) 3 else 1),
-      gstring)
-  
-}
-
 #' Read a test file
 readTestFile <- function(fileName) {
   paste(collapse = "\n",
@@ -41,4 +8,26 @@ readTestFile <- function(fileName) {
               fileName,
               package = "rjenkins",
               mustWork = TRUE)))
+}
+
+#' Indent lines
+#' @param text \code{character()} vector of text snippets ending in a newline
+#' @param indent \code{character()} string to indent with
+#' @return \code{character()}
+indentLines <- function(
+    text,
+    indent = strrep(" ", getOption("rjenkins.indent", 4))) {
+  
+  if (length(i <- which(!grepl("\n$", text))) > 0)
+    stop("snippet does not end in newline: ", text[i])
+  
+  paste0(indent, gsub("\n(.{1})", sprintf("\n%s\\1", indent), text))
+  
+}
+
+#' Add newlines to the end of text snippets
+#' @param texts \code{character()} vector of text snippets
+#' @return \code{character()}
+endLines <- function(texts) {
+  ifelse(!grepl("\n$", texts), paste0(texts, "\n"), texts)
 }

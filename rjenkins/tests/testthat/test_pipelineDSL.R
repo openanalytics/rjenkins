@@ -15,7 +15,12 @@ test_that("step", {
       
       expect_identical(
           step("a", foo = 4, "5", bar = 77, foobar = FALSE),
-          "a foo: 4, '5', bar: 77, foobar: false\n"
+          "a foo: 4, '5', bar: 77, foobar: false"
+      )
+      
+      expect_identical(
+          step("a", GroovyClosure(step("b", foo = 4))),
+          "a {\n  b foo: 4\n}\n"
       )
       
     })

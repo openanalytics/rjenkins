@@ -6,13 +6,14 @@ blockOp <- function(header) {
   force(header)
   
   function(...) {
-    args <- Filter(Negate(is.null), list(...))
-    
-    paste0(
-        header, " {\n",
-        if (length(args) > 0)
-          paste(indentLines(endLines(as.vector(args, "character"))), collapse = ""),
-        "}\n")
+    sprintf("%s %s", header, formatGroovyClosure(GroovyClosure(...)))
+#    args <- Filter(Negate(is.null), list(...))
+#    
+#    paste0(header, " ", 
+#        header, " {\n",
+#        if (length(args) > 0)
+#          paste(indentLines(endLines(as.vector(args, "character"))), collapse = ""),
+#        "}\n")
   }
 }
 
@@ -38,8 +39,7 @@ step <- function(name, ...) {
         paste(collapse = ", ",
             ifelse(argNames == "",
                 yes = argStr,
-                no = sprintf("%s: %s", argNames, argStr))),
-        "\n")
+                no = sprintf("%s: %s", argNames, argStr))))
   }
 }
 
@@ -60,31 +60,11 @@ formatParameter <- function(value) {
     value
   } else if (is(value, "GString")) {
     formatGString(value)
+  } else if (is(value, "GroovyClosure")) {
+    formatGroovyClosure(value)
   } else {
     formatGString(GString(value))
   }
-}
-
-#' Indent lines
-#' @param text \code{character()} vector of text snippets ending in a newline
-#' @param indent \code{character()} string to indent with
-#' @return \code{character()}
-indentLines <- function(
-    text,
-    indent = strrep(" ", getOption("rjenkins.indent", 4))) {
-  
-  if (length(i <- which(!grepl("\n$", text))) > 0)
-    stop("snippet does not end in newline: ", text[i])
-  
-  paste0(indent, gsub("\n(.{1})", sprintf("\n%s\\1", indent), text))
-  
-}
-
-#' Add newlines to the end of text snippets
-#' @param texts \code{character()} vector of text snippets
-#' @return \code{character()}
-endLines <- function(texts) {
-  ifelse(!grepl("\n$", texts), paste0(texts, "\n"), texts)
 }
 
 #' Right-Variadic operator
