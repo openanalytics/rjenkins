@@ -3,7 +3,7 @@
 \docType{data}
 \name{pipelineDirectives}
 \alias{pipelineDirectives}
-\title{Pipeline directives}
+\title{Pipeline Directives}
 \format{
 An object of class \code{list} of length 6.
 }
@@ -11,6 +11,9 @@ An object of class \code{list} of length 6.
 pipelineDirectives
 }
 \description{
-Pipeline directives
+Pipeline Directives
+}
+\references{
+\url{https://www.jenkins.io/doc/book/pipeline/syntax/#declarative-directives}
 }
 \keyword{datasets}

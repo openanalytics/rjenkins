@@ -3,7 +3,7 @@
 \docType{data}
 \name{pipelineSections}
 \alias{pipelineSections}
-\title{Pipeline sections}
+\title{Pipeline Sections}
 \format{
 An object of class \code{list} of length 4.
 }
@@ -11,6 +11,7 @@ An object of class \code{list} of length 4.
 pipelineSections
 }
 \description{
-Pipeline sections
+Sections in Declarative Pipeline typically contain one or more
+\code{\link{pipelineDirectives}} or \code{\link{pipelineSteps}}.
 }
 \keyword{datasets}

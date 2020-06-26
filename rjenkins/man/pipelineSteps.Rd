@@ -3,7 +3,7 @@
 \docType{data}
 \name{pipelineSteps}
 \alias{pipelineSteps}
-\title{Pipeline steps}
+\title{Pipeline Steps}
 \format{
 An object of class \code{list} of length 5.
 }
@@ -11,7 +11,7 @@ An object of class \code{list} of length 5.
 pipelineSteps
 }
 \description{
-Pipeline steps
+Pipeline Steps
 }
 \references{
 \url{https://jenkins.io/doc/pipeline/steps/}

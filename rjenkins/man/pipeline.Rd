@@ -16,7 +16,21 @@ pipeline(...)
 Declarative Pipeline syntax as a \code{character()}
 }
 \description{
-Generate Declarative Jenkins Pipeline syntax from a pipeline expression.
+Generate Declarative Jenkins Pipeline syntax from a pipeline
+expression.
+}
+\details{
+The pipeline expression will be evaluated in a new child
+environment of the caller context. This environment contains R function
+equivalents of the concepts (\link[=pipelineSections]{Sections},
+\link[=pipelineDirectives]{Directives} and \link[=pipelineSteps]{Steps})
+in the Pipeline Syntax.
+Any object from the caller context can be referenced but name clashes
+will be resolved in favor of the pipeline syntax, meaning it is not possible
+to override e.g. \code{pipeline()}
+
+\code{pipeline()} can be used as convenience shorthand for
+\code{jenkinsPipeline(pipeline())}
 }
 \examples{
 
@@ -43,4 +57,7 @@ if (interactive()) {
 }
 \references{
 \url{https://jenkins.io/doc/book/pipeline/syntax/}
+}
+\seealso{
+pipelineSections pipelineDirectives pipelineSteps
 }
