@@ -1,5 +1,4 @@
 
-#' Read a test file
 readTestFile <- function(fileName) {
   paste(collapse = "\n",
       readLines(
@@ -34,4 +33,12 @@ endLines <- function(texts) {
   if (length(texts) > 0)
     ifelse(!grepl("\n$", texts), paste0(texts, "\n"), texts)
   else character()
+}
+
+dropNull <- function(x) {
+  Filter(Negate(is.null), x)
+}
+
+`%&&%` <- function(a, b) {
+  if (is.null(a)) NULL else b
 }

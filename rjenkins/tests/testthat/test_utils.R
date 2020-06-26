@@ -22,3 +22,13 @@ test_that("line operations", {
           indentLines(endLines(LETTERS)))
       
     })
+
+test_that("dropNull", {
+      
+      expect_equal(dropNull(list(NULL)), list())
+      
+      expect_equal(dropNull(list(NULL, 1)), list(1))
+      
+      expect_equal(dropNull(list(1, NULL)), list(1))
+      
+    })

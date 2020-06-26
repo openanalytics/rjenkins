@@ -1,4 +1,39 @@
 
+#' Declarative Jenkins Pipeline
+#' @description Generate Declarative Jenkins Pipeline syntax from a pipeline expression.
+#' @rdname pipeline
+#' @param pipelineExpr pipeline expression
+#' @return Declarative Pipeline syntax as a \code{character()}
+#' @example inst/example/jenkinsPipeline.R
+#' @references \url{https://jenkins.io/doc/book/pipeline/syntax/}
+#' @export
+jenkinsPipeline <- function(pipelineExpr = pipeline()) {
+  
+  others <- list(
+      pipeline = blockOp("pipeline"),
+      always = blockOp("always"),
+      changed = blockOp("changed"),
+      fixed = blockOp("fixed"),
+      regression = blockOp("regression"),
+      success = blockOp("success"),
+      aborted = blockOp("aborted"),
+      step = step
+  )
+  
+  envir <- list2env(c(
+          pipelineSections,
+          pipelineDirectives,
+          pipelineSteps,
+          others),
+      parent = parent.frame())
+  
+  eval(substitute(pipelineExpr), envir)
+  
+}
+#' @rdname pipeline
+#' @export
+pipeline <- function(...) eval(substitute(jenkinsPipeline(pipeline(...))))
+
 #' Block
 #' @param header block header
 #' @return closure
@@ -7,13 +42,6 @@ blockOp <- function(header) {
   
   function(...) {
     sprintf("%s %s", header, formatGroovyClosure(GroovyClosure(...)))
-#    args <- Filter(Negate(is.null), list(...))
-#    
-#    paste0(header, " ", 
-#        header, " {\n",
-#        if (length(args) > 0)
-#          paste(indentLines(endLines(as.vector(args, "character"))), collapse = ""),
-#        "}\n")
   }
 }
 
@@ -31,7 +59,7 @@ step <- function(name, ...) {
   if (length(args) == 0) {
     paste0(name, "\n")
   } else {
-    argStr <- sapply(args, formatParameter)
+    argStr <- sapply(args, formatArgument)
     argNames <- if (is.null(names(args))) rep("", length(args)) else names(args)
     paste0(
         name,
@@ -47,25 +75,6 @@ step <- function(name, ...) {
 #' @param name step name
 #' @return closure
 stepOp <- function(name) function(...) step(name, ...)
-
-#' Format arguments and parameters
-#' @param value value to format
-#' @return \code{character()}
-formatParameter <- function(value) {
-  if (is.logical(value)) {
-    if (value) "true" else "false"
-  } else if (is.numeric(value)) {
-    sprintf("%s", value)
-  } else if (is(value, "AsIs")) {
-    value
-  } else if (is(value, "GString")) {
-    formatGString(value)
-  } else if (is(value, "GroovyClosure")) {
-    formatGroovyClosure(value)
-  } else {
-    formatGString(GString(value))
-  }
-}
 
 #' Right-Variadic operator
 #' @param nf number of fixed arguments
@@ -136,43 +145,6 @@ variadicOp <- function(n, left, sep, right) {
   }
 }
 
-
-
-#' Declarative Jenkins Pipeline
-#' @description Generate Declarative Jenkins Pipeline syntax from a pipeline expression.
-#' @rdname pipeline
-#' @param pipelineExpr pipeline expression
-#' @return Declarative Pipeline syntax as a \code{character()}
-#' @example inst/example/jenkinsPipeline.R
-#' @references \url{https://jenkins.io/doc/book/pipeline/syntax/}
-#' @export
-jenkinsPipeline <- function(pipelineExpr = pipeline()) {
-  
-  others <- list(
-      pipeline = blockOp("pipeline"),
-      always = blockOp("always"),
-      changed = blockOp("changed"),
-      fixed = blockOp("fixed"),
-      regression = blockOp("regression"),
-      success = blockOp("success"),
-      aborted = blockOp("aborted"),
-      step = step
-  )
-  
-  envir <- list2env(c(
-          pipelineSections,
-          pipelineDirectives,
-          pipelineSteps,
-          others),
-      parent = parent.frame())
-  
-  eval(substitute(pipelineExpr), envir)
-  
-}
-#' @rdname pipeline
-#' @export
-pipeline <- function(...) eval(substitute(jenkinsPipeline(pipeline(...))))
-
 #' Pipeline steps
 #' @references \url{https://jenkins.io/doc/pipeline/steps/}
 #' @export
@@ -185,6 +157,15 @@ pipelineSteps <- list(
     R = function(sexpr, options = "") {
       lines <- paste(collapse = "\n", deparse(substitute(sexpr)))
       pipelineSteps$sh(sprintf("R %s -e \\'%s\\'", options, lines))
+    },
+    container = function(containerName, ...) {
+      blockOp(sprintf("container(%s)", formatArgument(containerName)))(...)
+    },
+    withDockerRegistry = function(..., url = NULL, credentialsId = NULL) {
+      registry <- c(url = url, credentialsId = credentialsId)
+      blockOp(
+          sprintf("withDockerRegistry([%s])",
+              paste(collapse = ", ", sprintf('%s: "%s"', names(registry), registry))))(...)
     }
 )
 
@@ -196,6 +177,16 @@ pipelineSections <- list(
     steps = blockOp("steps"),
     post = blockOp("post")
 )
+
+directive <- function(header, content, maxExpr, ...) {
+  expr <- substitute(list(...))
+  if (length(expr) - 1 > maxExpr)
+    stop(sprintf("%s directive accepts only %i subexpression(s) but %i were provided",
+            header, maxExpr, length(match.call()) - 4))
+  do.call(
+      blockOp(header),
+      eval(substitute(list(...)), list2env(content, parent = parent.frame())))
+}
 
 #' Pipeline directives
 #' @export
@@ -217,109 +208,90 @@ pipelineDirectives <- list(
           allOf = blockOp("allOf"),
           anyOf = blockOp("anyOf")
       )
-      do.call(
-          blockOp("when"),
-          eval(substitute(list(...)),
-              list2env(conditions, parent = parent.frame()))
-      )
+      directive("when", conditions, Inf, ...)
     },
     
     environment = function(...) {
       do.call(
           blockOp("environment"),
           Map(
-              function(name, value) sprintf("%s = %s", name, formatParameter(value)),
+              function(name, value) sprintf("%s = %s", name, formatArgument(value)),
               name = names(c(...)),
               value = list(...)))
     },
     
     triggers = function(...) {
       triggers <- list(
-          cron = function(x) naryOp(1, c("cron(", ")"))(formatParameter(x)),
-          pollSCM = function(x) naryOp(1, c("pollSCM(", ")"))(formatParameter(x))
+          cron = function(x) naryOp(1, c("cron(", ")"))(formatArgument(x)),
+          pollSCM = function(x) naryOp(1, c("pollSCM(", ")"))(formatArgument(x))
       )
-      do.call(
-          blockOp("triggers"),
-          eval(substitute(list(...)),
-              list2env(triggers, parent = parent.frame())))
+      directive("triggers", triggers, Inf, ...)
     },
     
     options = function(...) {
       options <- list(
           buildDiscarder = naryOp(1, c("buildDiscarder(", ")")),
           logRotator = function(numToKeepStr) {
-            sprintf("logRotator(numToKeepStr: %s)", formatParameter(numToKeepStr))
+            sprintf("logRotator(numToKeepStr: %s)", formatArgument(numToKeepStr))
           }
       )
-      envir <- list2env(options, parent = parent.frame())
-      do.call(
-          blockOp("options"),
-          eval(substitute(list(...)), envir))
-    },
-    
-    docker = function(image = NULL, args = NULL, label = NULL,
-        reuseNode = NULL, customWorkspace = NULL, registryUrl = NULL,
-        registryCredentialsId = NULL, alwaysPull = NULL) {
-      do.call(blockOp("docker"),
-          Filter(Negate(is.null), list(
-                  if (!is.null(image))
-                    step("image", image),
-                  if (!is.null(args))
-                    step("args", args),
-                  if (!is.null(label))
-                    step("label", label),
-                  if (!is.null(reuseNode))
-                    step("reuseNode", reuseNode),
-                  if (!is.null(customWorkspace))
-                    step("customWorkspace", customWorkspace),
-                  if (!is.null(registryCredentialsId))
-                    step("registryCredentialsId",registryCredentialsId),
-                  if (!is.null(registryUrl))
-                    step("registryUrl", registryUrl),
-                  if (!is.null(alwaysPull))
-                    step("alwaysPull", alwaysPull)
-              )))
-    },
-    
-    dockerfile = function(fileName = NULL, reuseNode = NULL) {
-      do.call(blockOp("dockerfile"),
-          Filter(Negate(is.null), list(
-                  if (!is.null(fileName)) step("filename", fileName),
-                  if (!is.null(reuseNode)) step("reuseNode", reuseNode)
-              )))
-    },
-    
-    kubernetes = function(yaml = NULL, defaultContainer = NULL) {
-      do.call(blockOp("kubernetes"),
-          Filter(Negate(is.null), list(
-                  if (!is.null(yaml)) step("yaml", yaml),
-                  if (!is.null(defaultContainer)) step("defaultContainer", defaultContainer)
-              )))
-    },
-    
-    container = function(containerName, ...) {
-      blockOp(sprintf("container(%s)", formatParameter(containerName)))(...)
-    },
-    
-    withDockerRegistry = function(..., url = NULL, credentialsId = NULL) {
-      registry <- c(url = url, credentialsId = credentialsId)
-      blockOp(sprintf("withDockerRegistry([%s])",
-              paste(collapse = ", ", sprintf('%s: "%s"', names(registry), registry))))(...)
+      directive("options", options, Inf, ...)
     },
     
     agent = function(...) {
-      args <- list(...)
-      if (length(args) == 1 &&
-          is.character(args[[1]]) &&
-          any(args[[1]] == c("any", "none"))) {
-        paste0("agent ", args[[1]], "\n")
+      agents <- list(
+          docker = function(image = NULL, args = NULL, label = NULL,
+              reuseNode = NULL, customWorkspace = NULL, registryUrl = NULL,
+              registryCredentialsId = NULL, alwaysPull = NULL) {
+            blockOp("docker")(
+                image %&&% step("image", image),
+                args %&&% step("args", args),
+                label %&&% step("label", label),
+                reuseNode %&&% step("reuseNode", reuseNode),
+                customWorkspace %&&% step("customWorkspace", customWorkspace),
+                registryCredentialsId %&&% step("registryCredentialsId",registryCredentialsId),
+                registryUrl %&&% step("registryUrl", registryUrl),
+                alwaysPull %&&% step("alwaysPull", alwaysPull)
+            )
+          },
+          
+          dockerfile = function(fileName = NULL, reuseNode = NULL) {
+            blockOp("dockerfile")(
+                filename %&&% step("filename", fileName),
+                reuseNode %&&% step("reuseNode", reuseNode)
+            )
+          },
+          
+          kubernetes = function(yaml = NULL, defaultContainer = NULL) {
+            blockOp("kubernetes")(
+                yaml %&&% step("yaml", yaml),
+                defaultContainer %&&% step("defaultContainer", defaultContainer)
+            )
+          },
+      
+          any = "any",
+      
+          none = "none"
+      
+      )
+      thisCall <- match.call()
+      if (length(thisCall) - 1 > 0 && is(thisCall[[2]], "character")) {
+        # TODO: should depecrate this in favor of symbol-based any and none
+        # but need to test first if agent { any } is equivalent to agent any
+        paste0("agent ", thisCall[[2]], "\n")
       } else {
-        blockOp("agent")(...)
+        directive("agent", agents, 1, ...)
       }
     },
     
     stage = function(stageName, ...) {
-      blockOp(sprintf("stage(%s)", formatParameter(stageName)))(...)
+      directive(
+          sprintf("stage(%s)", formatArgument(stageName)),
+          c(  pipelineSections,
+              pipelineSteps,
+              pipelineDirectives[c("when", "agent", "environment")]),
+          Inf,
+          ...)
     }
 
 )

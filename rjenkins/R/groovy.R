@@ -7,7 +7,7 @@
 GroovyClosure <- function(..., parameters = character()) {
   
   structure(
-      Filter(Negate(is.null), list(...)),
+      dropNull(list(...)),
       parameters = parameters,
       class = c("GroovyClosure", "list")
   )
@@ -60,4 +60,23 @@ formatGString <- function(gstring) {
           if (attr(gstring, "multiLine")) 3 else 1),
       gstring)
   
+}
+
+#' Format arguments and parameters
+#' @param value value to format
+#' @return \code{character()}
+formatArgument <- function(value) {
+  if (is.logical(value)) {
+    if (value) "true" else "false"
+  } else if (is.numeric(value)) {
+    sprintf("%s", value)
+  } else if (is(value, "AsIs")) {
+    value
+  } else if (is(value, "GString")) {
+    formatGString(value)
+  } else if (is(value, "GroovyClosure")) {
+    formatGroovyClosure(value)
+  } else {
+    formatGString(GString(value))
+  }
 }
