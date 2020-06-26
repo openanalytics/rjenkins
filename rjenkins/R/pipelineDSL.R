@@ -1,10 +1,20 @@
 
 #' Declarative Jenkins Pipeline
-#' @description Generate Declarative Jenkins Pipeline syntax from a pipeline expression.
 #' @rdname pipeline
+#' @description Generate Declarative Jenkins Pipeline syntax from a pipeline
+#' expression.
+#' @details The pipeline expression will be evaluated in a new child
+#' environment of the caller context. This environment contains R function
+#' equivalents of the concepts (\link[=pipelineSections]{Sections},
+#' \link[=pipelineDirectives]{Directives} and \link[=pipelineSteps]{Steps})
+#' in the Pipeline Syntax.
+#' Any object from the caller context can be referenced but name clashes
+#' will be resolved in favor of the pipeline syntax, meaning it is not possible
+#' to override e.g. \code{pipeline()}
 #' @param pipelineExpr pipeline expression
 #' @return Declarative Pipeline syntax as a \code{character()}
 #' @example inst/example/jenkinsPipeline.R
+#' @seealso pipelineSections pipelineDirectives pipelineSteps
 #' @references \url{https://jenkins.io/doc/book/pipeline/syntax/}
 #' @export
 jenkinsPipeline <- function(pipelineExpr = pipeline()) {
@@ -31,6 +41,8 @@ jenkinsPipeline <- function(pipelineExpr = pipeline()) {
   
 }
 #' @rdname pipeline
+#' @details \code{pipeline()} can be used as convenience shorthand for
+#' \code{jenkinsPipeline(pipeline())}
 #' @export
 pipeline <- function(...) eval(substitute(jenkinsPipeline(pipeline(...))))
 
@@ -76,76 +88,7 @@ step <- function(name, ...) {
 #' @return closure
 stepOp <- function(name) function(...) step(name, ...)
 
-#' Right-Variadic operator
-#' @param nf number of fixed arguments
-#' @param nv minimum number of variable arguments
-#' @param parts vector of length \code{n +_1} to interlace with the fixed arguments
-#' @param left prefix for the variadic part
-#' @param sep separator for the variadic part
-#' @param right suffix for the variadic part
-#' @return closure
-rightVariadicOp <- function(nf, nv, parts, left, sep, right) {
-  
-  opf <- naryOp(nf, parts)
-  opv <- variadicOp(nv, left, sep, right)
-  
-  function(...) {
-    args <- list(...)
-    if (length(args) < nf)
-      stop(sprintf("Operator takes at least %i fixed arguments", nf))
-    
-    paste0(
-        do.call(opf, args[1:nf]),
-        do.call(opv, args[(nf+1):length(args)])
-    )
-    
-  }
-  
-}
-
-#' N-ary operator
-#' @param n exact number of arguments
-#' @param parts vector of length \code{n +_1} to interlace with the arguments
-#' @return closure
-naryOp <- function(n, parts) {
-  force(n)
-  force(parts)
-  
-  stopifnot(length(parts) == n + 1)
-  
-  function(...) {
-    args <- list(...)
-    
-    if (length(args) != n)
-      stop(sprintf("Operator %s takes exactly %i arguments", parts[1], n))
-    
-    paste0(parts, c(args,""), collapse = "")
-  }
-}
-
-#' Variadic operator
-#' @param n minimum number of arguments
-#' @param left text to use as a prefix
-#' @param right text to use as a suffix
-#' @param sep seperator text
-#' @return closure
-variadicOp <- function(n, left, sep, right) {
-  force(n)
-  force(left)
-  force(right)
-  force(sep)
-  
-  function(...) {
-    args <- list(...)
-    
-    if (length(args) < n)
-      stop(sprintf("Function %s takes at least %i arguments", left, n))
-    
-    paste0(left, paste(args, collapse = sep), right)
-  }
-}
-
-#' Pipeline steps
+#' Pipeline Steps
 #' @references \url{https://jenkins.io/doc/pipeline/steps/}
 #' @export
 pipelineSteps <- list(
@@ -169,7 +112,9 @@ pipelineSteps <- list(
     }
 )
 
-#' Pipeline sections
+#' Pipeline Sections
+#' @description Sections in Declarative Pipeline typically contain one or more
+#' \code{\link{pipelineDirectives}} or \code{\link{pipelineSteps}}.
 #' @export
 pipelineSections <- list(
     stages = blockOp("stages"),
@@ -188,7 +133,8 @@ directive <- function(header, content, maxExpr, ...) {
       eval(substitute(list(...)), list2env(content, parent = parent.frame(2))))
 }
 
-#' Pipeline directives
+#' Pipeline Directives
+#' @references \url{https://www.jenkins.io/doc/book/pipeline/syntax/#declarative-directives}
 #' @export
 pipelineDirectives <- list(
     
@@ -269,9 +215,9 @@ pipelineDirectives <- list(
             )
           },
       
-          any = "any",
+          any = function() "any",
       
-          none = "none"
+          none = function() "none"
       
       )
       thisCall <- match.call()
