@@ -1,11 +1,14 @@
 
 #' Groovy Closure
 #' @param ... statements
+#' @param parameters optional parameters: \code{character()}
+#' @seealso \url{https://groovy-lang.org/closures.html}
 #' @export
-GroovyClosure <- function(...) {
+GroovyClosure <- function(..., parameters = character()) {
   
   structure(
       Filter(Negate(is.null), list(...)),
+      parameters = parameters,
       class = c("GroovyClosure", "list")
   )
   
@@ -16,9 +19,12 @@ GroovyClosure <- function(...) {
 #' @return \code{character()}
 #' @export
 formatGroovyClosure <- function(closure) {
+  opening <- if (length(attr(closure, "parameters")) == 0) "{"
+      else sprintf("{ %s ->", toString(attr(closure, "parameters")))
+  closing <- "}"
   paste(collapse = "",
       endLines(
-          c("{", indentLines(as.vector(closure, "character")), "}")
+          c(opening, indentLines(as.vector(closure, "character")), closing)
       )
   )
 }

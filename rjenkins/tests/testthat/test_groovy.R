@@ -1,6 +1,8 @@
 
 context("groovy")
 
+options(rjenkins.indent = 2)
+
 test_that("groovy string formatting", {
       
       expect_identical(
@@ -42,5 +44,9 @@ test_that("groovy closure formatting", {
       expect_identical(
           formatGroovyClosure(GroovyClosure(NULL, 1, NULL)),
           "{\n  1\n}\n")
+      
+      expect_identical(
+          formatGroovyClosure(GroovyClosure(1, parameters = "a")),
+          "{ a ->\n  1\n}\n")
       
     })

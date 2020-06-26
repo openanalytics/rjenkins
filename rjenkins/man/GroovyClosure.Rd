@@ -4,11 +4,16 @@
 \alias{GroovyClosure}
 \title{Groovy Closure}
 \usage{
-GroovyClosure(...)
+GroovyClosure(..., parameters = character())
 }
 \arguments{
 \item{...}{statements}
+
+\item{parameters}{optional parameters: \code{character()}}
 }
 \description{
 Groovy Closure
+}
+\seealso{
+\url{https://groovy-lang.org/closures.html}
 }
