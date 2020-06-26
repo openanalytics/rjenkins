@@ -185,7 +185,7 @@ directive <- function(header, content, maxExpr, ...) {
             header, maxExpr, length(match.call()) - 4))
   do.call(
       blockOp(header),
-      eval(substitute(list(...)), list2env(content, parent = parent.frame())))
+      eval(substitute(list(...)), list2env(content, parent = parent.frame(2))))
 }
 
 #' Pipeline directives
