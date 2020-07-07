@@ -1,7 +1,7 @@
 Package: rjenkins
 Type: Package
 Title: Pipeline-oriented Jenkins Client for R
-Version: 0.6.0
+Version: 0.6.0.9000
 Date: 2020-07-07
 Author: Daan Seynaeve
 Maintainer: Daan Seynaeve <daan.seynaeve@openanalytics.eu>
