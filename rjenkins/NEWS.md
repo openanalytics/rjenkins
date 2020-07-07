@@ -1,9 +1,18 @@
 ## 0.6.0
 
-* fix: several bugfixes
-* feat(DSL): parallel. environment, when directives
-* feat(DSL): kubernetes plugin support
-* feat(DSL): support I() as an escape hatch to write literal groovy code
+### Bug Fixes
+
+* problems with `install_jenkins`
+* **DSL:** autoconvert any string to groovy string before formatting
+* **DSL:** line handling edge cases
+
+### Features
+
+* **DSL:**: tooling to explicitly model and format Groovy Language features
+  such as Groovy Strings and Closures
+* **DSL:**: parallel. environment, when directives
+* **DSL:**: kubernetes plugin support
+* **DSL:**: support I() as an escape hatch to write literal groovy code
 
 ## 0.5.0
 
