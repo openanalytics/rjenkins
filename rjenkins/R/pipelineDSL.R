@@ -1,24 +1,63 @@
 
+#' Declarative Jenkins Pipeline
+#' @rdname pipeline
+#' @description Generate Declarative Jenkins Pipeline syntax from a pipeline
+#' expression.
+#' @details The pipeline expression will be evaluated in a new child
+#' environment of the caller context. This environment contains R function
+#' equivalents of the concepts (\link[=pipelineSections]{Sections},
+#' \link[=pipelineDirectives]{Directives} and \link[=pipelineSteps]{Steps})
+#' in the Pipeline Syntax.
+#' Any object from the caller context can be referenced but name clashes
+#' will be resolved in favor of the pipeline syntax, meaning it is not possible
+#' to override e.g. \code{pipeline()}
+#' @param pipelineExpr pipeline expression
+#' @return Declarative Pipeline syntax as a \code{character()}
+#' @example inst/example/jenkinsPipeline.R
+#' @seealso pipelineSections pipelineDirectives pipelineSteps
+#' @references \url{https://jenkins.io/doc/book/pipeline/syntax/}
+#' @export
+jenkinsPipeline <- function(pipelineExpr = pipeline()) {
+  
+  others <- list(
+      pipeline = blockOp("pipeline"),
+      always = blockOp("always"),
+      changed = blockOp("changed"),
+      fixed = blockOp("fixed"),
+      regression = blockOp("regression"),
+      success = blockOp("success"),
+      aborted = blockOp("aborted"),
+      step = step
+  )
+  
+  envir <- list2env(c(
+          pipelineSections,
+          pipelineDirectives,
+          pipelineSteps,
+          others),
+      parent = parent.frame())
+  
+  eval(substitute(pipelineExpr), envir)
+  
+}
+#' @rdname pipeline
+#' @details \code{pipeline()} can be used as convenience shorthand for
+#' \code{jenkinsPipeline(pipeline())}
+#' @export
+pipeline <- function(...) eval(substitute(jenkinsPipeline(pipeline(...))))
+
 #' Block
-#' @description DSL helper function
 #' @param header block header
 #' @return closure
 blockOp <- function(header) {
   force(header)
   
   function(...) {
-    args <- Filter(Negate(is.null), list(...))
-    
-    paste0(
-        header, " {\n",
-        if (length(args) > 0)
-          paste(indentLines(endLines(as.vector(args, "character"))), collapse = ""),
-        "}\n")
+    sprintf("%s %s", header, formatGroovyClosure(GroovyClosure(...)))
   }
 }
 
 #' Step
-#' @description DSL helper function
 #' @param name step name
 #' @param ... step arguments
 #' @return \code{character()}
@@ -32,7 +71,7 @@ step <- function(name, ...) {
   if (length(args) == 0) {
     paste0(name, "\n")
   } else {
-    argStr <- sapply(args, formatParameter)
+    argStr <- sapply(args, formatArgument)
     argNames <- if (is.null(names(args))) rep("", length(args)) else names(args)
     paste0(
         name,
@@ -40,224 +79,165 @@ step <- function(name, ...) {
         paste(collapse = ", ",
             ifelse(argNames == "",
                 yes = argStr,
-                no = sprintf("%s: %s", argNames, argStr))),
-        "\n")
+                no = sprintf("%s: %s", argNames, argStr))))
   }
 }
 
 #' Step
-#' @description DSL helper function
 #' @param name step name
 #' @return closure
 stepOp <- function(name) function(...) step(name, ...)
 
+#' Pipeline Steps
+#' @references \url{https://jenkins.io/doc/pipeline/steps/}
+#' @export
+pipelineSteps <- list(
+    echo = stepOp("echo"),
+    sh = function(lines, multiLine = FALSE) {
+      if (!multiLine) step("sh", lines)
+      else sprintf("sh '''\n%s\n'''", lines)
+    },
+    R = function(sexpr, options = "") {
+      lines <- paste(collapse = "\n", deparse(substitute(sexpr)))
+      pipelineSteps$sh(sprintf("R %s -e \\'%s\\'", options, lines))
+    },
+    container = function(containerName, ...) {
+      blockOp(sprintf("container(%s)", formatArgument(containerName)))(...)
+    },
+    withDockerRegistry = function(..., url = NULL, credentialsId = NULL) {
+      registry <- c(url = url, credentialsId = credentialsId)
+      blockOp(
+          sprintf("withDockerRegistry([%s])",
+              paste(collapse = ", ", sprintf('%s: "%s"', names(registry), registry))))(...)
+    }
+)
 
-
-#' Pipeline sections
-#' @description DSL helper functions
+#' Pipeline Sections
+#' @description Sections in Declarative Pipeline typically contain one or more
+#' \code{\link{pipelineDirectives}} or \code{\link{pipelineSteps}}.
 #' @export
 pipelineSections <- list(
     stages = blockOp("stages"),
+    parallel = blockOp("parallel"),
     steps = blockOp("steps"),
     post = blockOp("post")
 )
 
-#' Pipeline directives
-#' @description DSL helper functions
+directive <- function(header, content, maxExpr, ...) {
+  expr <- substitute(list(...))
+  if (length(expr) - 1 > maxExpr)
+    stop(sprintf("%s directive accepts only %i subexpression(s) but %i were provided",
+            header, maxExpr, length(match.call()) - 4))
+  do.call(
+      blockOp(header),
+      eval(substitute(list(...)), list2env(content, parent = parent.frame(2))))
+}
+
+#' Pipeline Directives
+#' @references \url{https://www.jenkins.io/doc/book/pipeline/syntax/#declarative-directives}
 #' @export
 pipelineDirectives <- list(
     
+    when = function(...) {
+      conditions <- list(
+          branch = stepOp("branch"),
+          buildingTag = stepOp("buildingTag"),
+          changelog = stepOp("changelog"),
+          changeset = stepOp("changeset"),
+          changeRequest = stepOp("changeRequest"),
+          environment = stepOp("environment"),
+          equals = stepOp("equals"),
+          expression = function(x) I(x),
+          tag = stepOp("tag"),
+          triggeredBy = stepOp("triggeredBy"),
+          not = blockOp("not"),
+          allOf = blockOp("allOf"),
+          anyOf = blockOp("anyOf")
+      )
+      directive("when", conditions, Inf, ...)
+    },
+    
+    environment = function(...) {
+      do.call(
+          blockOp("environment"),
+          Map(
+              function(name, value) sprintf("%s = %s", name, formatArgument(value)),
+              name = names(c(...)),
+              value = list(...)))
+    },
+    
     triggers = function(...) {
       triggers <- list(
-          cron = function(x) naryOp(1, c("cron(", ")"))(formatParameter(x)),
-          pollSCM = function(x) naryOp(1, c("pollSCM(", ")"))(formatParameter(x))
+          cron = function(x) naryOp(1, c("cron(", ")"))(formatArgument(x)),
+          pollSCM = function(x) naryOp(1, c("pollSCM(", ")"))(formatArgument(x))
       )
-      do.call(
-          blockOp("triggers"),
-          eval(substitute(list(...)),
-              list2env(triggers, parent = parent.frame())))
+      directive("triggers", triggers, Inf, ...)
     },
     
     options = function(...) {
       options <- list(
           buildDiscarder = naryOp(1, c("buildDiscarder(", ")")),
           logRotator = function(numToKeepStr) {
-            sprintf("logRotator(numToKeepStr: %s)", formatParameter(numToKeepStr))
+            sprintf("logRotator(numToKeepStr: %s)", formatArgument(numToKeepStr))
           }
       )
-      envir <- list2env(options, parent = parent.frame())
-      do.call(
-          blockOp("options"),
-          eval(substitute(list(...)), envir))
-    },
-    
-    docker = function(image = NULL, args = NULL, label = NULL,
-        reuseNode = NULL, customWorkspace = NULL, registryUrl = NULL,
-        registryCredentialsId = NULL, alwaysPull = NULL) {
-      do.call(blockOp("docker"),
-          Filter(Negate(is.null), list(
-                  if (!is.null(image)) step("image", image),
-                  if (!is.null(args)) step("args", args),
-                  if (!is.null(label)) step("label", label),
-                  if (!is.null(reuseNode)) step("reuseNode", reuseNode),
-                  if (!is.null(customWorkspace)) step("customWorkspace", customWorkspace),
-                  if (!is.null(registryCredentialsId)) step("registryCredentialsId", registryCredentialsId),
-                  if (!is.null(registryUrl)) step("registryUrl", registryUrl),
-                  if (!is.null(alwaysPull)) step("alwaysPull", alwaysPull)
-                  )))
+      directive("options", options, Inf, ...)
     },
     
     agent = function(...) {
-      args <- list(...)
-      if (length(args) == 1 &&
-          is.character(args[[1]]) &&
-          any(args[[1]] == c("any", "none"))) {
-        paste0("agent ", args[[1]], "\n")
+      agents <- list(
+          docker = function(image = NULL, args = NULL, label = NULL,
+              reuseNode = NULL, customWorkspace = NULL, registryUrl = NULL,
+              registryCredentialsId = NULL, alwaysPull = NULL) {
+            blockOp("docker")(
+                image %&&% step("image", image),
+                args %&&% step("args", args),
+                label %&&% step("label", label),
+                reuseNode %&&% step("reuseNode", reuseNode),
+                customWorkspace %&&% step("customWorkspace", customWorkspace),
+                registryCredentialsId %&&% step("registryCredentialsId",registryCredentialsId),
+                registryUrl %&&% step("registryUrl", registryUrl),
+                alwaysPull %&&% step("alwaysPull", alwaysPull)
+            )
+          },
+          
+          dockerfile = function(fileName = NULL, reuseNode = NULL) {
+            blockOp("dockerfile")(
+                filename %&&% step("filename", fileName),
+                reuseNode %&&% step("reuseNode", reuseNode)
+            )
+          },
+          
+          kubernetes = function(yaml = NULL, defaultContainer = NULL) {
+            blockOp("kubernetes")(
+                yaml %&&% step("yaml", yaml),
+                defaultContainer %&&% step("defaultContainer", defaultContainer)
+            )
+          },
+      
+          any = function() "any",
+      
+          none = function() "none"
+      
+      )
+      thisCall <- match.call()
+      if (length(thisCall) - 1 > 0 && is(thisCall[[2]], "character")) {
+        # TODO: should depecrate this in favor of symbol-based any and none
+        # but need to test first if agent { any } is equivalent to agent any
+        paste0("agent ", thisCall[[2]], "\n")
       } else {
-        blockOp("agent")(...)
+        directive("agent", agents, 1, ...)
       }
     },
     
     stage = function(stageName, ...) {
-      
-      blockOp(sprintf("stage(%s)", formatParameter(stageName)))(...)
-      
+      directive(
+          sprintf("stage(%s)", formatArgument(stageName)),
+          c(  pipelineSections,
+              pipelineSteps,
+              pipelineDirectives[c("when", "agent", "environment")]),
+          Inf,
+          ...)
     }
-    
+
 )
-
-#' Generate Declarative Jenkins Pipeline syntax from a pipeline expression
-#' @description TODO refer to Jenkins 2 book
-#' @rdname pipeline
-#' @param pipelineExpr pipeline expression
-#' @return Declarative Pipeline syntax as a \code{character()}
-#' @export
-jenkinsPipeline <- function(pipelineExpr) {
-  
-  others <- list(
-      pipeline = blockOp("pipeline"),
-      always = blockOp("always"),
-      echo = stepOp("echo"),
-      step = step
-  )
-  
-  envir <- list2env(c(
-          pipelineSections,
-          pipelineDirectives,
-          others),
-      parent = parent.frame())
-  
-  eval(substitute(pipelineExpr), envir)
-  
-  # TODO escaping
-  # structure(eval(pipelineExpr, envir), class = "Jenkinsfile") 
-  
-}
-
-#' Format arguments and parameters
-#' @description DSL helper function
-#' @param value value to format
-#' @return \code{character()}
-formatParameter <- function(value) {
-  if (is.logical(value)) {
-    if (value) "true" else "false"
-  } else if (is.numeric(value)) {
-    sprintf("%s", value)
-  } else {
-    sprintf("'%s'", value)
-  }
-}
-
-#' Indent lines
-#' @description DSL helper function
-#' @param text \code{character()} vector of text snippets ending in a newline
-#' @param indent \code{character()} string to indent with
-#' @return \code{character()}
-indentLines <- function(text, indent = "    ") {
-  
-  if (length(i <- which(!grepl("\n$", text))) > 0)
-    stop("snippet does not end in newline: ", text[i])
-  
-  paste0(indent, gsub("\n(.{1})", sprintf("\n%s\\1", indent), text))
-  
-}
-
-#' Add newlines to the end of text snippets
-#' @description DSL helper function
-#' @param texts \code{character()} vector of text snippets
-#' @return \code{character()}
-endLines <- function(texts) {
-  ifelse(!grepl("\n$", texts), paste0(texts, "\n"), texts)
-}
-
-#' Right-Variadic operator
-#' @description DSL helper function
-#' @param nf number of fixed arguments
-#' @param nv minimum number of variable arguments
-#' @param parts vector of length \code{n +_1} to interlace with the fixed arguments
-#' @param left prefix for the variadic part
-#' @param sep separator for the variadic part
-#' @param right suffix for the variadic part
-rightVariadicOp <- function(nf, nv, parts, left, sep, right) {
-  
-  opf <- naryOp(nf, parts)
-  opv <- variadicOp(nv, left, sep, right)
-  
-  function(...) {
-    args <- list(...)
-    if (length(args) < nf)
-      stop(sprintf("Operator takes at least %i fixed arguments", nf))
-    
-    paste0(
-        do.call(opf, args[1:nf]),
-        do.call(opv, args[(nf+1):length(args)])
-    )
-    
-  }
-  
-}
-
-#' N-ary operator
-#' @description DSL helper function
-#' @param n exact number of arguments
-#' @param parts vector of length \code{n +_1} to interlace with the arguments
-#' @return closure
-naryOp <- function(n, parts) {
-  force(n)
-  force(parts)
-  
-  stopifnot(length(parts) == n + 1)
-  
-  function(...) {
-    args <- list(...)
-    
-    if (length(args) != n)
-      stop(sprintf("Operator %s takes exactly %i arguments", parts[1], n))
-    
-    paste0(parts, c(args,""), collapse = "")
-  }
-}
-
-#' Variadic operator
-#' @description DSL helper function
-#' @param n minimum number of arguments
-#' @param left text to use as a prefix
-#' @param right text to use as a suffix
-#' @param sep seperator text
-#' @return closure
-variadicOp <- function(n, left, sep, right) {
-  force(n)
-  force(left)
-  force(right)
-  force(sep)
-  
-  function(...) {
-    args <- list(...)
-    
-    if (length(args) < n)
-      stop(sprintf("Function %s takes at least %i arguments", left, n))
-    
-    paste0(left, paste(args, collapse = sep), right)
-  }
-}
-

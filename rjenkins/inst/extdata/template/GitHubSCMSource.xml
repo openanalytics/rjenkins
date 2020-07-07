@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source
+	class="org.jenkinsci.plugins.github_branch_source.GitHubSCMSource"
+	plugin="github-branch-source@2.4.2">
+	<id>STUB</id>
+	<apiUri>STUB</apiUri>
+	<credentialsId>STUB</credentialsId>
+	<repoOwner>STUB</repoOwner>
+	<repository>STUB</repository>
+	<traits>
+		<org.jenkinsci.plugins.github__branch__source.BranchDiscoveryTrait>
+			<strategyId>1</strategyId>
+		</org.jenkinsci.plugins.github__branch__source.BranchDiscoveryTrait>
+		<org.jenkinsci.plugins.github__branch__source.OriginPullRequestDiscoveryTrait>
+			<strategyId>1</strategyId>
+		</org.jenkinsci.plugins.github__branch__source.OriginPullRequestDiscoveryTrait>
+		<org.jenkinsci.plugins.github__branch__source.ForkPullRequestDiscoveryTrait>
+			<strategyId>1</strategyId>
+			<trust
+				class="org.jenkinsci.plugins.github_branch_source.ForkPullRequestDiscoveryTrait$TrustPermission" />
+		</org.jenkinsci.plugins.github__branch__source.ForkPullRequestDiscoveryTrait>
+		<jenkins.plugins.git.traits.LocalBranchTrait
+			plugin="git@3.9.3">
+			<extension
+				class="hudson.plugins.git.extensions.impl.LocalBranch">
+				<localBranch>**</localBranch>
+			</extension>
+		</jenkins.plugins.git.traits.LocalBranchTrait>
+		<org.jenkinsci.plugins.github__branch__source.SSHCheckoutTrait>
+			<credentialsId>STUB</credentialsId>
+		</org.jenkinsci.plugins.github__branch__source.SSHCheckoutTrait>
+		<jenkins.plugins.git.traits.CleanAfterCheckoutTrait
+			plugin="git@3.9.3">
+			<extension
+				class="hudson.plugins.git.extensions.impl.CleanCheckout" />
+		</jenkins.plugins.git.traits.CleanAfterCheckoutTrait>
+		<jenkins.plugins.git.traits.CleanBeforeCheckoutTrait
+			plugin="git@3.9.3">
+			<extension
+				class="hudson.plugins.git.extensions.impl.CleanBeforeCheckout" />
+		</jenkins.plugins.git.traits.CleanBeforeCheckoutTrait>
+	</traits>
+</source>

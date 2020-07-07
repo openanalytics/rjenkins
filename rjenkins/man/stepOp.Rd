@@ -13,5 +13,5 @@ stepOp(name)
 closure
 }
 \description{
-DSL helper function
+Step
 }

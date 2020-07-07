@@ -1,17 +1,12 @@
 
-#' Jenkins Job
-#' @description Create an object representing a jenkins job.
-#' @template jenkinsOp
-#' @param name job name
-#' @param parent (optional) parent job
-#' @export
-jenkinsJob <- function(conn, name, parent = NULL) {
+JenkinsJob <- function(conn, name, path, parent = NULL) {
   
   structure(
       list(conn = conn,
           name = name,
+          path = path,
           parent = parent),
-      class = c("jenkinsJob", "list"))
+      class = c("JenkinsJob", "list"))
   
 }
 
@@ -32,36 +27,35 @@ JENKINS_BUILD_REFS <- c("lastBuild", "lastCompletedBuild", "lastFailedBuild",
     "lastStableBuild", "lastSuccessfulBuild", "lastUnsuccessfulBuild")
 
 
-#' Browse a Jenkins Job in the Jenkins web interface
+#' Browse Jenkins objects in the web interface
 #' @rdname browse
 #' @importFrom httr modify_url
 #' @export
-browse.jenkinsJob <- function(x, ...) {
+browse.JenkinsJob <- function(x, ...) {
   
-  browseURL(modify_url(x$conn$host, path = x$name), ...)
+  browseURL(modify_url(x$conn$host, path = c(x$conn$contextPath, x$path)), ...)
   
 }
 
 #' Show a Jenkins Job
 #' @param x object representing a jenkins job.
 #' @param ... further arguments; not used
-#' @seealso \code{\link{getJob}}
 #' @importFrom httr modify_url
 #' @export
-print.jenkinsJob <- function(x, ...) {
+print.JenkinsJob <- function(x, ...) {
   
   cat(sprintf("<jenkins job with url: %s>\n",
-          modify_url(x$conn$host, path = x$name)))
+          modify_url(x$conn$host, path = c(x$conn$contextPath, x$path))))
   
 }
 
 #' Summarize Jenkins Job
 #' @description Get summary information for the given jenkins job
-#' @param object object of class \code{jenkinsJob} e.g. created using \code{\link{getJob}}
+#' @param object object of class \code{JenkinsJob} e.g. created using \code{\link{getJob}}
 #' @param ... further arguments; not used
 #' @importFrom methods show
 #' @export
-summary.jenkinsJob <- function(object, ...) {
+summary.JenkinsJob <- function(object, ...) {
   
   info <- getJobInfo(object)
   history <- getBuildHistory(object)
@@ -98,28 +92,25 @@ summary.jenkinsJob <- function(object, ...) {
 #' Get General Job Information
 #' @description Query some general information about a job such as it's
 #' descriptione etc.
-#' @template jenkinsJobOp
+#' @template JenkinsJobOp
 #' @return list with properties
 #' @importFrom xml2 as_list xml_name
 #' @export
 getJobInfo <- function(job) {
   
-  url <- modify_url(job$conn$host,
-      path = c(job$name, "api", "xml"),
-      query = list(
-          tree = "description,displayName"))
+  xml <- jenkinsGET(job$conn,
+      path = job$path,
+      tree = "description,displayName")
   
-  response <- GET(url, authenticate(job$conn$user, job$conn$token))
-  
-  result <- unlist(recursive = FALSE, as_list(content(response))[[1]])
-  result$itemType <- xml_name(content(response))
+  result <- unlist(recursive = FALSE, as_list(xml)[[1]])
+  result$itemType <- xml_name(xml)
   
   result
   
 }
 
 #' Get the Build History
-#' @template jenkinsJobOp
+#' @template JenkinsJobOp
 #' @param depth maximum number of builds to list
 #' @return \code{data.frame} where each row corresponds to one build
 #' @importFrom xml2 xml_children xml_text xml_child
@@ -130,7 +121,7 @@ getBuildHistory <- function(job, depth = 3) {
     stop("depth must be strictly positive")
   
   url <- modify_url(job$conn$host,
-      path = c(job$name, "api", "xml"),
+      path = c(job$conn$contextPath, job$path, "api", "xml"),
       query = list(
           xpath = "/*/build",
           wrapper = "builds",
@@ -169,7 +160,7 @@ getBuildHistory <- function(job, depth = 3) {
 }
 
 #' List Build Artifacts 
-#' @template jenkinsJobOp
+#' @template JenkinsJobOp
 #' @param build build number or a build ref. See \code{\link{JENKINS_BUILD_REFS}}
 #' @importFrom httr modify_url GET authenticate content http_error
 #' @importFrom xml2 as_list
@@ -181,7 +172,7 @@ listArtifacts <- function(job, build = JENKINS_BUILD_REFS) {
   }
   
   url <- modify_url(job$conn$host,
-      path = c(job$name, build, "api", "xml"),
+      path = c(job$conn$contextPath, job$path, build, "api", "xml"),
       query = list(xpath = "/*/artifact/relativePath", wrapper = "artifacts"))
   
   response <- GET(url, authenticate(job$conn$user, job$conn$token))
@@ -193,11 +184,19 @@ listArtifacts <- function(job, build = JENKINS_BUILD_REFS) {
   
 }
 
+#' Delete a job
+#' @template JenkinsJobOp
+#' @export
+deleteJob <- function(job) {
+  
+  invisible(jenkinsPOST(job$conn, c(job$path, "doDelete"), xml = NULL))
+  
+}
 
 #' Schedule a Build
-#' @template jenkinsJobOp
+#' @template JenkinsJobOp
 #' @param params build parameters; named list
-#' @importFrom httr http_status
+#' @importFrom httr http_status modify_url
 #' @export
 scheduleBuild <- function(job, params = NULL) {
   
@@ -206,12 +205,12 @@ scheduleBuild <- function(job, params = NULL) {
     if (!is.list(params) || length(names(params)) != length(params))
       stop("build parameters should be given as a named list")
     
-    url <- modify_url(job$conn$host, path = c(job$name, "buildWithParameters"))
+    url <- modify_url(job$conn$host, path = c(job$conn$contextPath, job$path, "buildWithParameters"))
     body <- params
     
   } else {
     
-    url <- modify_url(job$conn$host, path = c(job$name, "build"))
+    url <- modify_url(job$conn$host, path = c(job$conn$contextPath, job$path, "build"))
     body <- NULL
     
   }
@@ -221,9 +220,11 @@ scheduleBuild <- function(job, params = NULL) {
       crumbHeader(crumbRequest(job$conn)),
       body = body)
   
+  if (status_code(response) %/% 100 == 2) message("Build scheduled.")
+  
   if (status_code(response) == 400 && is.null(params)) {
     
-    parametersQueryReponse <- GET(modify_url(job$conn$host, path = c(job$name, "api", "xml")),
+    parametersQueryReponse <- GET(modify_url(job$conn$host, path = c(job$conn$contextPath, job$path, "api", "xml")),
         authenticate(job$conn$user, job$conn$token),
         query = list(
             xpath = "/*/property[@_class='hudson.model.ParametersDefinitionProperty']",
@@ -244,26 +245,29 @@ scheduleBuild <- function(job, params = NULL) {
     
   }
   
+  invisible(job)
+  
 }
 
 #' Schedule SCM Polling
 #' @description TODO
-#' @template jenkinsJobOp
+#' @template JenkinsJobOp
 #' @export
 schedulePoll <- function(job) {
   
-  # FIXME
+  res <- jenkinsPOST(job$conn, path = c(job$path, "polling"))
   
-  stop("not yet implemented")
+  if (res$status %/% 100 == 2) message("SCM polling scheduled.")
+  
+  invisible(job)
   
 }
 
 
 #' Retrieve the Build Log
-#' @template jenkinsJobOp
+#' @template JenkinsJobOp
 #' @param build build number or a build ref. See \code{\link{JENKINS_BUILD_REFS}}
 #' @param start byte offset
-#' @importFrom httr modify_url GET authenticate content stop_for_status
 #' @export
 getBuildLog <- function(job, build = JENKINS_BUILD_REFS, start = 0) {
   
@@ -271,54 +275,51 @@ getBuildLog <- function(job, build = JENKINS_BUILD_REFS, start = 0) {
     build <- match.arg(build, JENKINS_BUILD_REFS)
   }
   
-  url <- modify_url(job$conn$host,
-      path = c(job$name, build, "logText", "progressiveText"),
+  jenkinsGET(job$conn,
+      path = c(job$path, build, "logText", "progressiveText"),
       query = list(start = start))
-  
-  response <- GET(url, authenticate(job$conn$user, job$conn$token))
-  
-  stop_for_status(response)
-  
-  content(response)
   
 }
 
 #' @rdname listJobs
 #' @export
-listJobs.jenkinsJob <- function(x) {
+listJobs.JenkinsJob <- function(x) {
   
-  url <- modify_url(x$conn$host,
-      path = c(x$name, "api", "xml"),
-      query = list(xpath = "/*/job/name", wrapper = "jobs"))
+  xml <- jenkinsGET(x$conn,
+      path = x$path,
+      xpath = "/*/job/name",
+      wrapper = "jobs")
   
-  response <- GET(url, authenticate(x$conn$user, x$conn$token))
-  
-  stop_for_status(response)
-  
-  unlist(as_list(content(response)), use.names = FALSE)
+  unlist(as_list(xml), use.names = FALSE)
   
 }
 
 #' @rdname getJob
+#' @param ... zero or more child job names
 #' @export
-getJob.jenkinsJob <- function(x, name) {
+getJob.JenkinsJob <- function(x, name, ...) {
   
-  jenkinsJob(
+  job <- JenkinsJob(
       conn = x$conn,
-      name = sprintf("%s/job/%s", x$name, escapeJenkinsItemName(name)),
+      name = name,
+      path = c(x$path, "job", name),
       parent = x)
   
+  getJobRecursive(job, ...)
+  
+}
+
+getJobRecursive <- function(job, ...) {
+  hierarchy <- list(...)
+  if (length(hierarchy) == 0) job
+  else do.call(getJob, c(list(job, name = hierarchy[[1]]), hierarchy[-1]))
 }
 
 #' @rdname hasJob
 #' @importFrom httr HEAD modify_url authenticate status_code
 #' @export
-hasJob.jenkinsJob <- function(x, name) {
+hasJob.JenkinsJob <- function(x, name) {
   
-  url <- modify_url(x$conn$host, path = c(x$name, "job", name))
-  
-  response <- HEAD(url, authenticate(x$conn$user, x$conn$token))
-  
-  status_code(response) == 200
+  jenkinsHEAD(x$conn, c(x$path, "job", name))$status %/% 100 == 2
   
 }

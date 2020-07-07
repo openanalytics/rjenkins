@@ -1,14 +1,15 @@
 Package: rjenkins
 Type: Package
-Title: Jenkins API client for R
-Version: 0.4.0
-Date: 2019-01-15
+Title: Pipeline-oriented Jenkins Client for R
+Version: 0.6.0
+Date: 2020-07-07
 Author: Daan Seynaeve
 Maintainer: Daan Seynaeve <daan.seynaeve@openanalytics.eu>
-Description: R wrapper around the jenkins API.
-License: file LICENSE
-Imports: httr, xml2, utils, stats, methods
+Description: Create, manage and trigger Jenkins pipeline jobs.
+License: GPL-3
+Imports: httr, xml2, utils, stats, methods, openssl, curl
 Enhances: remotes
 Suggests: knitr, keyringr, testthat
-RoxygenNote: 6.1.0
+RoxygenNote: 7.1.0
 VignetteBuilder: knitr
+Encoding: UTF-8

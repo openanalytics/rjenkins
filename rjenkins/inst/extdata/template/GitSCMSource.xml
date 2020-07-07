@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source class="jenkins.plugins.git.GitSCMSource"
+	plugin="git@3.9.1">
+	<id>STUB</id>
+	<remote>STUB</remote>
+	<credentialsId>STUB</credentialsId>
+	<traits>
+		<jenkins.plugins.git.traits.BranchDiscoveryTrait />
+	</traits>
+</source>

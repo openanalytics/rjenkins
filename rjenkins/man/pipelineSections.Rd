@@ -3,12 +3,15 @@
 \docType{data}
 \name{pipelineSections}
 \alias{pipelineSections}
-\title{Pipeline sections}
-\format{An object of class \code{list} of length 3.}
+\title{Pipeline Sections}
+\format{
+An object of class \code{list} of length 4.
+}
 \usage{
 pipelineSections
 }
 \description{
-DSL helper functions
+Sections in Declarative Pipeline typically contain one or more
+\code{\link{pipelineDirectives}} or \code{\link{pipelineSteps}}.
 }
 \keyword{datasets}

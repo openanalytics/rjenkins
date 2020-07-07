@@ -2,9 +2,12 @@
 % Please edit documentation in R/pipelineDSL.R
 \name{jenkinsPipeline}
 \alias{jenkinsPipeline}
-\title{Generate Declarative Jenkins Pipeline syntax from a pipeline expression}
+\alias{pipeline}
+\title{Declarative Jenkins Pipeline}
 \usage{
-jenkinsPipeline(pipelineExpr)
+jenkinsPipeline(pipelineExpr = pipeline())
+
+pipeline(...)
 }
 \arguments{
 \item{pipelineExpr}{pipeline expression}
@@ -13,5 +16,48 @@ jenkinsPipeline(pipelineExpr)
 Declarative Pipeline syntax as a \code{character()}
 }
 \description{
-TODO refer to Jenkins 2 book
+Generate Declarative Jenkins Pipeline syntax from a pipeline
+expression.
+}
+\details{
+The pipeline expression will be evaluated in a new child
+environment of the caller context. This environment contains R function
+equivalents of the concepts (\link[=pipelineSections]{Sections},
+\link[=pipelineDirectives]{Directives} and \link[=pipelineSteps]{Steps})
+in the Pipeline Syntax.
+Any object from the caller context can be referenced but name clashes
+will be resolved in favor of the pipeline syntax, meaning it is not possible
+to override e.g. \code{pipeline()}
+
+\code{pipeline()} can be used as convenience shorthand for
+\code{jenkinsPipeline(pipeline())}
+}
+\examples{
+
+if (interactive()) {
+  
+  x <- jenkinsPipeline(
+      pipeline(
+          agent("any"),
+          stages(
+              stage("Build", steps(echo("hello")))
+          )
+      )
+  )
+  
+  # shorthand
+  x <- pipeline(
+      agent("any"),
+      stages(
+          stage("Build", steps(echo("hello")))
+      )
+  )
+  
+}
+}
+\references{
+\url{https://jenkins.io/doc/book/pipeline/syntax/}
+}
+\seealso{
+pipelineSections pipelineDirectives pipelineSteps
 }
