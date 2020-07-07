@@ -15,7 +15,7 @@ GroovyClosure <- function(..., parameters = character()) {
 }
 
 #' Format a groovy closure
-#' @param closure \link{\code{GroovyClosure}}
+#' @param closure \code{\link{GroovyClosure}}
 #' @return \code{character()}
 #' @export
 formatGroovyClosure <- function(closure) {

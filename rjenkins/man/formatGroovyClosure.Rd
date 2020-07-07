@@ -7,7 +7,7 @@
 formatGroovyClosure(closure)
 }
 \arguments{
-\item{closure}{\link{\code{GroovyClosure}}}
+\item{closure}{\code{\link{GroovyClosure}}}
 }
 \value{
 \code{character()}
