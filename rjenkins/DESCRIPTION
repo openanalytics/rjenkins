@@ -12,3 +12,4 @@ Enhances: remotes
 Suggests: knitr, keyringr, testthat
 RoxygenNote: 7.1.0
 VignetteBuilder: knitr
+Encoding: UTF-8
