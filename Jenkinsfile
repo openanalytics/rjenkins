@@ -48,6 +48,7 @@ pipeline {
             }
             steps {
                 container('curl') {
+                    sh 'ls'
                     rdepotSubmit 'https://rdepot-dev.openanalytics.eu', 'public', "${env.SCM_CHANGELOG}", 'jenkins-rdepot-dev-token'
                 }
             }
