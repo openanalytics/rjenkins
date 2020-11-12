@@ -25,6 +25,13 @@ test_that("step", {
       
     })
 
+test_that("when", {
+      expect_identical(
+          jenkinsPipeline(when(branch("master"), beforeAgent = TRUE)),
+          "when {\n  branch 'master'\n  beforeAgent true\n}\n"
+      )
+    })
+
 test_that("environment", {
       
       expect_identical(
