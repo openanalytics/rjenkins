@@ -123,14 +123,13 @@ pipelineSections <- list(
     post = blockOp("post")
 )
 
-directive <- function(header, content, maxExpr, ...) {
-  expr <- substitute(list(...))
-  if (length(expr) - 1 > maxExpr)
-    stop(sprintf("%s directive accepts only %i subexpression(s) but %i were provided",
-            header, maxExpr, length(match.call()) - 4))
-  do.call(
-      blockOp(header),
-      eval(substitute(list(...)), list2env(content, parent = parent.frame(2))))
+directive <- function(header, allowedContent, ...) {
+  content <- dropNull(eval(substitute(list(...)), list2env(allowedContent, parent = parent.frame(2))))
+  
+  opts <- names(content) != ""
+  content[opts] <- Map(step, name = names(content[opts]), content[opts])
+  
+  do.call(blockOp(header), content)
 }
 
 #' Pipeline Directives
@@ -154,7 +153,7 @@ pipelineDirectives <- list(
           allOf = blockOp("allOf"),
           anyOf = blockOp("anyOf")
       )
-      directive("when", conditions, Inf, ...)
+      directive("when", conditions, ...)
     },
     
     environment = function(...) {
@@ -171,7 +170,7 @@ pipelineDirectives <- list(
           cron = function(x) naryOp(1, c("cron(", ")"))(formatArgument(x)),
           pollSCM = function(x) naryOp(1, c("pollSCM(", ")"))(formatArgument(x))
       )
-      directive("triggers", triggers, Inf, ...)
+      directive("triggers", triggers, ...)
     },
     
     options = function(...) {
@@ -181,7 +180,7 @@ pipelineDirectives <- list(
             sprintf("logRotator(numToKeepStr: %s)", formatArgument(numToKeepStr))
           }
       )
-      directive("options", options, Inf, ...)
+      directive("options", options, ...)
     },
     
     agent = function(...) {
@@ -226,7 +225,7 @@ pipelineDirectives <- list(
         # but need to test first if agent { any } is equivalent to agent any
         paste0("agent ", thisCall[[2]], "\n")
       } else {
-        directive("agent", agents, 1, ...)
+        directive("agent", agents, ...)
       }
     },
     
@@ -236,7 +235,6 @@ pipelineDirectives <- list(
           c(  pipelineSections,
               pipelineSteps,
               pipelineDirectives[c("when", "agent", "environment")]),
-          Inf,
           ...)
     }
 

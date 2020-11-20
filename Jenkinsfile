@@ -11,11 +11,11 @@ pipeline {
                 - cat
                 tty: yes
                 image: openanalytics/r-base:latest
-              - name: curl
+              - name: rdepot-cli
                 command:
                 - cat
                 tty: yes
-                image: byrnedo/alpine-curl
+                image: 196229073436.dkr.ecr.eu-west-1.amazonaws.com/oa-infrastructure/rdepot-cli:latest
             '''
             defaultContainer 'r'
         }
@@ -47,12 +47,20 @@ pipeline {
                 }
             }
             steps {
-                container('curl') {
+                container('rdepot-cli') {
                     sh 'ls'
-                    rdepotSubmit 'https://rdepot-dev.openanalytics.eu', 'public', "${env.SCM_CHANGELOG}", 'jenkins-rdepot-dev-token'
+                    withCredentials([string(credentialsId: 'jenkins-rdepot-dev-token', variable: 'RDEPOT_TOKEN')]) {
+                        sh """
+                        rdepot packages submit \
+                          -f *.tar.gz \
+                          --repo public \
+                          --replace false \
+                          --host https://rdepot-dev.openanalytics.eu \
+                          --token ${env.RDEPOT_TOKEN}
+                        """
+                    }
                 }
             }
         }
     }
 }
-
