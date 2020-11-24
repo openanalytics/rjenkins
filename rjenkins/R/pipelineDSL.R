@@ -93,10 +93,7 @@ stepOp <- function(name) function(...) step(name, ...)
 #' @export
 pipelineSteps <- list(
     echo = stepOp("echo"),
-    sh = function(lines, multiLine = FALSE) {
-      if (!multiLine) step("sh", lines)
-      else sprintf("sh '''\n%s\n'''", lines)
-    },
+    sh = function(lines) step("sh", lines),
     R = function(sexpr, options = "") {
       lines <- paste(collapse = "\n", deparse(substitute(sexpr)))
       pipelineSteps$sh(sprintf("R %s -e \\'%s\\'", options, lines))
