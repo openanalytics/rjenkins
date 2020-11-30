@@ -26,6 +26,7 @@ jenkinsPipeline <- function(pipelineExpr = pipeline()) {
       fixed = blockOp("fixed"),
       regression = blockOp("regression"),
       success = blockOp("success"),
+      failure = blockOp("failure"),
       aborted = blockOp("aborted"),
       step = step
   )
