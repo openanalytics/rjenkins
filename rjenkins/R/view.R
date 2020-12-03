@@ -14,7 +14,7 @@ JenkinsView <- function(jenkins, path) {
 #' @export
 browse.JenkinsView <- function(x, ...) {
   
-  browseURL(modify_url(x$conn$host, path = curl_escape(c(job$conn$contextPath, x$path))), ...)
+  browseURL(modify_url(x$conn$host, path = curl_escape(c(x$conn$contextPath, x$path))), ...)
   
 }
 
@@ -27,7 +27,7 @@ browse.JenkinsView <- function(x, ...) {
 print.JenkinsView <- function(x, ...) {
   
   cat(sprintf("<jenkins view with url: %s>\n",
-          modify_url(x$conn$host, path = curl_escape(c(job$conn$contextPath, x$path)))))
+          modify_url(x$conn$host, path = curl_escape(c(x$conn$contextPath, x$path)))))
   
 }
 
