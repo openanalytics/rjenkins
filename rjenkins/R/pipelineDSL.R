@@ -166,7 +166,9 @@ pipelineDirectives <- list(
     triggers = function(...) {
       triggers <- list(
           cron = function(x) naryOp(1, c("cron(", ")"))(formatArgument(x)),
-          pollSCM = function(x) naryOp(1, c("pollSCM(", ")"))(formatArgument(x))
+          pollSCM = function(x) naryOp(1, c("pollSCM(", ")"))(formatArgument(x)),
+          upstream = function(...)
+            formatGroovyCall(GroovyCall("upstream", ...))
       )
       directive("triggers", triggers, ...)
     },

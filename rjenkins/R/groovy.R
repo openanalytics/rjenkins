@@ -1,4 +1,46 @@
 
+#' Groovy Method Call
+#' @param name method name
+#' @param ... mix of unnamed and named arguments: \code{character()}
+#' @seealso \url{http://docs.groovy-lang.org/docs/groovy-latest/html/documentation/#_named_parameters_2}
+#' @export
+GroovyCall <- function(name, ...) {
+  
+  structure(
+      list(
+          name = name,
+          arguments = sapply(list(...), formatArgument)
+      ),
+      class = c("GrooyCall", "list")
+  )
+  
+}
+
+#' Format Groovy Call
+#' @param call \code{\link{GroovyCall}}
+#' @export
+formatGroovyCall <- function(call, brackets = TRUE) {
+  
+  args <- if (!is.null(names(call$arguments)) || is.null(call$arguments)) {
+    call$arguments
+  } else {
+    setNames(call$arguments, rep("", length(call$arguments)))
+  }
+  
+  namedArgs <- names(args) != ""
+  
+  sprintf(if (!brackets) "%s %s" else "%s(%s)",
+      call$name,
+      paste(collapse = ", ",
+          c(  sprintf("%s: %s",
+                  names(args[namedArgs]),
+                  args[namedArgs]),
+              args[!namedArgs])
+      )
+  )
+  
+}
+
 #' Groovy Closure
 #' @param ... statements
 #' @param parameters optional parameters: \code{character()}

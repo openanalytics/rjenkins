@@ -50,3 +50,27 @@ test_that("groovy closure formatting", {
           "{ a ->\n  1\n}\n")
       
     })
+
+test_that("groovy function calls", {
+      
+      expect_identical(
+          formatGroovyCall(GroovyCall("foobar")),
+          "foobar()"
+      )
+      
+      expect_identical(
+          formatGroovyCall(GroovyCall("foobar", 1302)),
+          "foobar(1302)"
+      )  
+      
+      expect_identical(
+          formatGroovyCall(GroovyCall("foobar", foo = 1, bar = "biz")),
+          "foobar(foo: 1, bar: 'biz')"
+      )
+
+      expect_identical(
+          formatGroovyCall(GroovyCall("foobar", foo = 1, bar = "biz", 1302)),
+          "foobar(foo: 1, bar: 'biz', 1302)"
+      )
+      
+    })
