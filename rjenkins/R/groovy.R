@@ -1,14 +1,14 @@
 
 #' Groovy Method Call
-#' @param name method name
+#' @param .name method name
 #' @param ... mix of unnamed and named arguments: \code{character()}
 #' @seealso \url{http://docs.groovy-lang.org/docs/groovy-latest/html/documentation/#_named_parameters_2}
 #' @export
-GroovyCall <- function(name, ...) {
+GroovyCall <- function(.name, ...) {
   
   structure(
       list(
-          name = name,
+          name = .name,
           arguments = sapply(list(...), formatArgument)
       ),
       class = c("GrooyCall", "list")

@@ -4,10 +4,10 @@
 \alias{GroovyCall}
 \title{Groovy Method Call}
 \usage{
-GroovyCall(name, ...)
+GroovyCall(.name, ...)
 }
 \arguments{
-\item{name}{method name}
+\item{.name}{method name}
 
 \item{...}{mix of unnamed and named arguments: \code{character()}}
 }
