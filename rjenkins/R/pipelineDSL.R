@@ -26,6 +26,7 @@ jenkinsPipeline <- function(pipelineExpr = pipeline()) {
       fixed = blockOp("fixed"),
       regression = blockOp("regression"),
       success = blockOp("success"),
+      failure = blockOp("failure"),
       aborted = blockOp("aborted"),
       step = step
   )
@@ -93,10 +94,7 @@ stepOp <- function(name) function(...) step(name, ...)
 #' @export
 pipelineSteps <- list(
     echo = stepOp("echo"),
-    sh = function(lines, multiLine = FALSE) {
-      if (!multiLine) step("sh", lines)
-      else sprintf("sh '''\n%s\n'''", lines)
-    },
+    sh = function(lines) step("sh", lines),
     R = function(sexpr, options = "") {
       lines <- paste(collapse = "\n", deparse(substitute(sexpr)))
       pipelineSteps$sh(sprintf("R %s -e \\'%s\\'", options, lines))
@@ -144,7 +142,9 @@ pipelineDirectives <- list(
           changelog = stepOp("changelog"),
           changeset = stepOp("changeset"),
           changeRequest = stepOp("changeRequest"),
-          environment = stepOp("environment"),
+          environment = function(...) formatGroovyCall(GroovyCall("environment", ...),
+                brackets = FALSE),
+          # environment = stepOp("environment"),
           equals = stepOp("equals"),
           expression = function(x) I(x),
           tag = stepOp("tag"),
@@ -168,7 +168,9 @@ pipelineDirectives <- list(
     triggers = function(...) {
       triggers <- list(
           cron = function(x) naryOp(1, c("cron(", ")"))(formatArgument(x)),
-          pollSCM = function(x) naryOp(1, c("pollSCM(", ")"))(formatArgument(x))
+          pollSCM = function(x) naryOp(1, c("pollSCM(", ")"))(formatArgument(x)),
+          upstream = function(...)
+            formatGroovyCall(GroovyCall("upstream", ...))
       )
       directive("triggers", triggers, ...)
     },

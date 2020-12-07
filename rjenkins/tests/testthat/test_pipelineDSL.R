@@ -30,6 +30,17 @@ test_that("when", {
           jenkinsPipeline(when(branch("master"), beforeAgent = TRUE)),
           "when {\n  branch 'master'\n  beforeAgent true\n}\n"
       )
+      
+      expect_identical(
+          jenkinsPipeline(
+              when(
+                  allOf(
+                      environment(name = "FOO", value = "bar")
+                  )
+              )
+          ),
+          "when {\n  allOf {\n    environment name: 'FOO', value: 'bar'\n  }\n}\n"
+      )
     })
 
 test_that("environment", {
