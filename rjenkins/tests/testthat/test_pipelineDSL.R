@@ -39,7 +39,7 @@ test_that("when", {
                   )
               )
           ),
-          "when {\n  allOf {\n environment name: 'FOO', value: 'bar'}}\n"
+          "when {\n  allOf {\n    environment name: 'FOO', value: 'bar'\n  }\n}\n"
       )
     })
 

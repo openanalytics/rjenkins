@@ -9,7 +9,7 @@ GroovyCall <- function(.name, ...) {
   structure(
       list(
           name = .name,
-          arguments = sapply(list(...), formatArgument)
+          arguments = list(...)
       ),
       class = c("GrooyCall", "list")
   )
@@ -18,27 +18,45 @@ GroovyCall <- function(.name, ...) {
 
 #' Format Groovy Call
 #' @param call \code{\link{GroovyCall}}
+#' @param brackets include brackets around arguments
+#' @param closureSugar if the last argument is a closure, move it outside the
+#' brackets 
 #' @export
-formatGroovyCall <- function(call, brackets = TRUE) {
+formatGroovyCall <- function(call, brackets = TRUE, closureSugar = FALSE) {
   
   args <- if (!is.null(names(call$arguments)) || is.null(call$arguments)) {
     call$arguments
   } else {
     setNames(call$arguments, rep("", length(call$arguments)))
   }
+
+  nArgs <- length(args)
+  
+  if (closureSugar && nArgs >= 1 && is(args[[nArgs]], "GroovyClosure")) {
+    sprintf(if (!brackets) "%s %s, %s" else "%s(%s) %s",
+        call$name,
+        formatGroovyCallArgs(args[-nArgs]),
+        formatArgument(args[[nArgs]]))
+  } else {
+    sprintf(if (!brackets) "%s %s" else "%s(%s)",
+        call$name,
+        formatGroovyCallArgs(args))
+  }
+  
+}
+
+formatGroovyCallArgs <- function(args) {
+  
+  args <- sapply(args, formatArgument)
   
   namedArgs <- names(args) != ""
   
-  sprintf(if (!brackets) "%s %s" else "%s(%s)",
-      call$name,
-      paste(collapse = ", ",
-          c(  sprintf("%s: %s",
-                  names(args[namedArgs]),
-                  args[namedArgs]),
-              args[!namedArgs])
-      )
+  paste(collapse = ", ",
+      c(  sprintf("%s: %s",
+              names(args[namedArgs]),
+              args[namedArgs]),
+          args[!namedArgs])
   )
-  
 }
 
 #' Groovy Closure
