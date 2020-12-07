@@ -4,10 +4,15 @@
 \alias{formatGroovyCall}
 \title{Format Groovy Call}
 \usage{
-formatGroovyCall(call, brackets = TRUE)
+formatGroovyCall(call, brackets = TRUE, closureSugar = FALSE)
 }
 \arguments{
 \item{call}{\code{\link{GroovyCall}}}
+
+\item{brackets}{include brackets around arguments}
+
+\item{closureSugar}{if the last argument is a closure, move it outside the
+brackets}
 }
 \description{
 Format Groovy Call
