@@ -95,7 +95,7 @@ stepOp <- function(name) function(...) step(name, ...)
 pipelineSteps <- list(
     echo = stepOp("echo"),
     sh = function(lines) step("sh", lines),
-    R = function(sexpr, options = "") {
+    R = function(sexpr, options = "-q") {
       lines <- paste(collapse = "\n", deparse(substitute(sexpr)))
       pipelineSteps$sh(sprintf("R %s -e \\'%s\\'", options, lines))
     },
