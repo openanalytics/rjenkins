@@ -3,12 +3,12 @@ pipeline {
   stages {
     stage('Roxygen') {
       steps {
-        sh 'R  -e \'roxygen2::roxygenize("myPackage")\''
+        sh 'R -q -e \'roxygen2::roxygenize("myPackage")\''
       }
     }
     stage('Build') {
       steps {
-        sh 'R  -e \'devtools::build("myPackage")\''
+        sh 'R -q -e \'devtools::build("myPackage")\''
       }
     }
   }
