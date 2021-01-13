@@ -98,7 +98,7 @@ formatGroovyClosure <- function(closure) {
 GString <- function(
     x,
     multiLine = grepl("\n", x),
-    interpolation = grepl("\\$\\{[^\\{]*\\}", x)) {
+    interpolation = grepl("\\$\\{[^\\]*\\}", x)) {
   
   structure(
       x,

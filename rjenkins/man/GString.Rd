@@ -7,7 +7,7 @@
 GString(
   x,
   multiLine = grepl("\\n", x),
-  interpolation = grepl("\\\\$\\\\{[^\\\\{]*\\\\}", x)
+  interpolation = grepl("\\\\$\\\\{[^\\\\]*\\\\}", x)
 )
 }
 \arguments{
