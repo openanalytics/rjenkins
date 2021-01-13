@@ -25,6 +25,14 @@ test_that("step", {
       
     })
 
+test_that("basic steps", {
+      
+      expect_identical(
+          jenkinsPipeline(dir("foo", echo("bar"))),
+          "dir('foo') {\n  echo 'bar'\n}\n")
+      
+    })
+
 test_that("when", {
       expect_identical(
           jenkinsPipeline(when(branch("master"), beforeAgent = TRUE)),

@@ -95,6 +95,9 @@ stepOp <- function(name) function(...) step(name, ...)
 pipelineSteps <- list(
     echo = stepOp("echo"),
     sh = function(lines) step("sh", lines),
+    dir = function(path, ...) {
+      blockOp(sprintf("dir(%s)", formatArgument(path)))(...)
+    },
     R = function(sexpr, options = "-q") {
       lines <- paste(collapse = "\n", deparse(substitute(sexpr)))
       pipelineSteps$sh(sprintf("R %s -e \\'%s\\'", options, lines))
