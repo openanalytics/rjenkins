@@ -73,6 +73,13 @@ test_that("groovy method calls", {
           "foobar(foo: 1, bar: 'biz', 1302)"
       )
       
+      expect_identical(
+          formatGroovyCall(GroovyCall("foobar",
+                  foo = GroovyCall("foobar", foo = 1)
+              )),
+          "foobar(foo: foobar(foo: 1))"
+      )
+      
     })
 
 test_that("groovy closure arg", {

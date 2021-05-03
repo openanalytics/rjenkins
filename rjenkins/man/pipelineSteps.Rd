@@ -5,7 +5,7 @@
 \alias{pipelineSteps}
 \title{Pipeline Steps}
 \format{
-An object of class \code{list} of length 5.
+An object of class \code{list} of length 6.
 }
 \usage{
 pipelineSteps

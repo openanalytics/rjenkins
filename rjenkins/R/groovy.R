@@ -11,7 +11,7 @@ GroovyCall <- function(.name, ...) {
           name = .name,
           arguments = list(...)
       ),
-      class = c("GrooyCall", "list")
+      class = c("GroovyCall", "list")
   )
   
 }
@@ -98,7 +98,7 @@ formatGroovyClosure <- function(closure) {
 GString <- function(
     x,
     multiLine = grepl("\n", x),
-    interpolation = grepl("\\$\\{[^\\{]*\\}", x)) {
+    interpolation = grepl("\\$\\{[^\\]*\\}", x)) {
   
   structure(
       x,
@@ -136,6 +136,8 @@ formatArgument <- function(value) {
     formatGString(value)
   } else if (is(value, "GroovyClosure")) {
     formatGroovyClosure(value)
+  } else if (is(value, "GroovyCall")) {
+    formatGroovyCall(value)
   } else {
     formatGString(GString(value))
   }
