@@ -49,13 +49,13 @@ pipeline {
             steps {
                 container('rdepot-cli') {
                     sh 'ls'
-                    withCredentials([string(credentialsId: 'jenkins-rdepot-dev-token', variable: 'RDEPOT_TOKEN')]) {
+                    withCredentials([string(credentialsId: 'jenkins-rdepot-token', variable: 'RDEPOT_TOKEN')]) {
                         sh """
                         rdepot packages submit \
                           -f *.tar.gz \
                           --repo public \
                           --replace false \
-                          --host https://rdepot-dev.openanalytics.eu \
+                          --host https://rdepot.openanalytics.eu \
                           --token ${env.RDEPOT_TOKEN}
                         """
                     }
