@@ -110,6 +110,9 @@ pipelineSteps <- list(
       blockOp(
           sprintf("withDockerRegistry([%s])",
               paste(collapse = ", ", sprintf('%s: "%s"', names(registry), registry))))(...)
+    },
+    withAWS = function(..., credentials = NULL) {
+        formatGroovyCall(GroovyCall("withAWS", credentials = credentials, GroovyClosure(...)), closureSugar = TRUE)
     }
 )
 
